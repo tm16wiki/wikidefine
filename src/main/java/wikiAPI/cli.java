@@ -44,18 +44,8 @@ public class cli {
         //whole content
         //System.out.println(text.clearXML(content));
 
-
         //Test Definition
-        String definition = text.clearXML(content);
-        while (definition.indexOf("\n")==0){
-            definition = definition.substring(1, definition.length());
-        }
-        definition = definition.substring(0, definition.indexOf("\n"));
-        definition = definition.replaceAll("'''", "\"");
-        definition = definition.replaceAll("''", "\"");
-        //zeilenumbruch
-
-        System.out.println("\n\n"+definition);
+        System.out.println("\n\n"+text.getDefinition(content));
 
     }
 

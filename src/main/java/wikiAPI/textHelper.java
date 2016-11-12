@@ -195,4 +195,16 @@ class textHelper {
 
         return xml;
     }
+
+
+    String getDefinition(String xml){
+        String definition = clearXML(xml);
+        while (definition.indexOf("\n")==0){
+            definition = definition.substring(1, definition.length());
+        }
+        definition = definition.substring(0, definition.indexOf("\n"));
+        definition = definition.replaceAll("'''", "\"");
+        definition = definition.replaceAll("''", "\"");
+        return definition;
+    }
 }
