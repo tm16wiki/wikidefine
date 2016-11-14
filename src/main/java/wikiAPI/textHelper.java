@@ -198,13 +198,14 @@ class textHelper {
 
 
     String getDefinition(String xml){
-        String definition = clearXML(xml);
-        while (definition.indexOf("\n")==0){
+        String definition = clearXML(xml); // clear xml tags
+        while (definition.indexOf("\n")==0){ // only first paragraph
             definition = definition.substring(1, definition.length());
         }
         definition = definition.substring(0, definition.indexOf("\n"));
         definition = definition.replaceAll("'''", "\"");
         definition = definition.replaceAll("''", "\"");
+        definition = definition.replaceAll("\\s*\\([^)]*\\)", "");
         return definition;
     }
 }
