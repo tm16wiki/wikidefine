@@ -205,7 +205,8 @@ class textHelper {
         definition = definition.substring(0, definition.indexOf("\n"));
         definition = definition.replaceAll("'''", "\"");
         definition = definition.replaceAll("''", "\"");
-        definition = definition.replaceAll("\\s*\\([^)]*\\)", "");
+        definition = definition.replaceAll("\\s*\\([^)]*\\)", ""); // remove brackets
+        definition = definition.replaceAll("&lt;ref&gt;\\[[^)]*\\]&lt;\\/ref&gt;", ""); // remove ref links
         return definition;
     }
 }
