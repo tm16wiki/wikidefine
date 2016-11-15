@@ -10,29 +10,29 @@ import java.util.regex.Pattern;
 
 class textHelper {
 
-    //TODO: -{{Begriffsklärungshinweis}} -> flag mehrdeutig
-    //TODO: *{{Siehe-auch|Liste-von-Straßen-und-Plätzen-in-Leipzig}} tags
-    //TODO: *{{Hauptartikel|Geschichte-der-Stadt-Leipzig}}
-    //TODO: *{{Infobox-...
-    //TODO: *{{Nachbargemeinden...
-    //TODO: *{{Panorama|
-    //TODO: *{|-class=&quot;wikitable&quot;...
-    //TODO: *{{Wahldiagramm... {{Sitzverteilung
-    //TODO: -Links &lt;ref&gt;[URL text]datum&lt;/ref&gt;
-    //TODO: *
-    //TODO: *{{Internetquelle |url...
-    //TODO: *&amp;nbsp;
-    //TODO: *{{Zitat|...
+    // -{{Begriffsklärungshinweis}} -> flag mehrdeutig
+    // *{{Siehe-auch|Liste-von-Straßen-und-Plätzen-in-Leipzig}} tags
+    // *{{Hauptartikel|Geschichte-der-Stadt-Leipzig}}
+    // *{{Infobox-...
+    // *{{Nachbargemeinden...
+    // *{{Panorama|
+    // *{|-class=&quot;wikitable&quot;...
+    // *{{Wahldiagramm... {{Sitzverteilung
+    // -Links &lt;ref&gt;[URL text]datum&lt;/ref&gt;
+    // *
+    // *{{Internetquelle |url...
+    // *&amp;nbsp;
+    // *{{Zitat|...
 
 
     ArrayList<String> findFiles(String text) {
-        ArrayList<String> files = new ArrayList<String>();
+        ArrayList<String> files = new ArrayList<>();
         String pattern = "(\\[\\[)Datei:(.*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         while (m.find()) {
             String file = m.group();
-            //TODO: filetags?
+            //TODO: filetags finden?
             //removes picturetags and text from file tag
             if (file.contains("|")) {
                 file = file.substring(0, file.indexOf("|"));
@@ -49,7 +49,7 @@ class textHelper {
 
 
     ArrayList<String> findArticles(String text) {
-        ArrayList<String> articles = new ArrayList<String>();
+        ArrayList<String> articles = new ArrayList<>();
         //Regex für artikel [[ ... ]] ('[' und ']’ ausgeschlossen falls verschachtelt)
         String pattern = "(\\[\\[)([^:\\[\\]]*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
@@ -77,7 +77,7 @@ class textHelper {
 
 
     ArrayList<String> findCategories(String text) {
-        ArrayList<String> categories = new ArrayList<String>();
+        ArrayList<String> categories = new ArrayList<>();
         String pattern = "(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
@@ -96,7 +96,7 @@ class textHelper {
 
 
     ArrayList<String> findWeblinks(String text) {
-        ArrayList<String> weblinks = new ArrayList<String>();
+        ArrayList<String> weblinks = new ArrayList<>();
         //"&lt;ref([^\\[]*)&gt;\\[http://([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;" link ohne http://
 
         String pattern = "&lt;ref([^\\[]*)&gt;\\[([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;";
@@ -111,12 +111,11 @@ class textHelper {
 
 
     ArrayList<String> findWikiObject(String text) {
-        ArrayList<String> objects = new ArrayList<String>();
-        //TODO artikel in objekten
-        //TODO {| class... |} richtig entfernen
+        ArrayList<String> objects = new ArrayList<>();
+        //TODO infoboxen und {| class... |} richtig entfernen
         //2 stufig um verschachtelung von objekten aufzuloesen
         for(int i=0; i<2; i++){
-            String pattern = "\\{\\{([^\\{\\}]*)\\}\\}";
+            String pattern = "\\{\\{([^{}]*)\\}\\}";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(text);
             while (m.find()) {
@@ -133,48 +132,46 @@ class textHelper {
     }
 
 
-    String extractText(String xml) {
+    private String extractText(String article) {
 
         //remove html comments
-        xml = xml.replaceAll("<!--(.*)-->", "");
-
-        //remove category tag
-        xml = xml.replaceAll("(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])", "")
+        String extract = article.replaceAll("<!--(.*)-->", "")
+                //remove category tag
+                .replaceAll("(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])", "")
                 //remove files
                 .replaceAll("(\\[\\[)Datei:(.*)(\\]\\])", "")
                 //remove wikipediaClasses
                 .replaceAll("\\{\\| class=&quot;(\\w*)&quot;", "");
+        //remove articles keep text
+        Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
+        Matcher m = r.matcher(extract);
+        while (m.find()) {
+            String atext = m.group(2);
+            String text;
+            //removes text link from article tag
+            if (atext.contains("|")) {
+                text = atext.substring(atext.indexOf("|") + 1, atext.length());
+                extract = extract.replace(m.group(), text);
+            } else {
+                extract = extract.replace(m.group(), m.group(2));
+            }
+        }
 
         //remove wikipediaobjects
-        for(int i=0; i<2; i++){
-            String pattern = "\\{\\{([^\\{\\}]*)\\}\\}";
-            Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(xml);
+        for (int i = 0; i < 5; i++) {
+            String pattern = "(\\{\\{)([^\\{\\}]*)(\\}\\})";
+            r = Pattern.compile(pattern);
+            m = r.matcher(extract);
             while (m.find()) {
-                xml = xml.replace(m.group(), "");
+                extract = extract.replace(m.group(), "");
             }
         }
-        //remove articles keep text
-        Pattern r;
-        r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
-        Matcher m = r.matcher(xml);
-        while (m.find()) {
-            String article = m.group(2);
-            String articletext;
-            //removes text link from article tag
-            if (article.contains("|")) {
-                articletext = article.substring(article.indexOf("|")+1, article.length());
-                xml = xml.replace(m.group(), articletext);
-            } else {
-                xml = xml.replace(m.group(), m.group(2));
-            }
-        }
-        return xml;
+        return extract;
     }
 
 
-    String getDefinition(String mxml) {
-        String xml = extractText(mxml); // clear xml tags
+    String getDefinition(String article) {
+        String xml = extractText(article); // clear xml tags
         //reduce to first paragraph
         try {
             while (xml.indexOf("\n") == 0) {
@@ -182,9 +179,9 @@ class textHelper {
             }
             xml = xml.substring(0, xml.indexOf("\n"));
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
-        //TODO besser machen  nochmal durch jsoup jagen..?
+        //TODO besser machen als nochmal durch jsoup jagen..?
         Document doc = Jsoup.parse(xml);
         //System.out.println(doc.text().trim());
         xml = doc.text().trim();

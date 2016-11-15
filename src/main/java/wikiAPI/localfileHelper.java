@@ -63,7 +63,7 @@ class localfileHelper extends Thread {
                     String article = xml.getTagValue(page, "text");
                     String title = xml.getTagValue(page, "title");
                     String definition = text.getDefinition(article);
-                    if (evaluateDefinition(definition)) {
+                    if (!evaluateDefinition(definition)) {
                         //TODO to db?
                         System.out.println(title + " : " + definition);
                     }
@@ -106,7 +106,7 @@ class localfileHelper extends Thread {
 class filetest {
     public static void main(String[] args) throws IOException {
         int threadnr = 1;
-        int maxpages = 10;
+        int maxpages = 100;
         if(threadnr >Runtime.getRuntime().availableProcessors()){
             threadnr=Runtime.getRuntime().availableProcessors();
         }
