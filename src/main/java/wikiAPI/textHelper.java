@@ -133,23 +133,17 @@ class textHelper {
     }
 
 
-    String clearXML(String xml) {
+    String extractText(String xml) {
+
+        //remove html comments
+        xml = xml.replaceAll("<!--(.*)-->", "");
 
         //remove category tag
-        xml = xml.replaceAll("(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])","");
-        //remove files
-        xml = xml.replaceAll("(\\[\\[)Datei:(.*)(\\]\\])","");
-
-        //TODO Linktexte erhalten, klassen und objekte unterscheiden
-        //TODO {| class... |} richtig entfernen
-        //remove wikipediaClasses
-        xml = xml.replaceAll("\\{\\| class=&quot;(\\w*)&quot;" , "");
-        //remove weblinks
-        //xml = xml.replaceAll("&lt;ref([^\\[]*)&gt;\\[http://([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;","");
-        //TODO
-        //xml = xml.replaceAll("&lt;/ref&gt;","");
-        //xml = xml.replaceAll("&lt;ref&gt;","");
-
+        xml = xml.replaceAll("(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])", "")
+                //remove files
+                .replaceAll("(\\[\\[)Datei:(.*)(\\]\\])", "")
+                //remove wikipediaClasses
+                .replaceAll("\\{\\| class=&quot;(\\w*)&quot;", "");
 
         //remove wikipediaobjects
         for(int i=0; i<2; i++){
@@ -160,7 +154,6 @@ class textHelper {
                 xml = xml.replace(m.group(), "");
             }
         }
-
         //remove articles keep text
         Pattern r;
         r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
@@ -171,42 +164,40 @@ class textHelper {
             //removes text link from article tag
             if (article.contains("|")) {
                 articletext = article.substring(article.indexOf("|")+1, article.length());
-                article = article.substring(0, article.lastIndexOf("|"));
                 xml = xml.replace(m.group(), articletext);
-                //System.out.println(article + " text: " + articletext);
             } else {
                 xml = xml.replace(m.group(), m.group(2));
-                //System.out.println(m.group(2) + " text: " + m.group(2));
             }
         }
-
-
-
-        Document doc = Jsoup.parse(xml);
-        //System.out.println(doc.html());
-        //xml = doc.text();
-
-
-        //remove html comments
-        xml = xml.replaceAll("&lt;!--(.*)--&gt;","");
-        //remove empty <ref></ref> tags
-        xml = xml.replaceAll("&lt;ref&gt;&lt;/ref&gt;","");
-        xml = xml.replaceAll("<ref></ref>","");
-
         return xml;
     }
 
 
-    String getDefinition(String xml){
-        String definition = clearXML(xml); // clear xml tags
-        while (definition.indexOf("\n")==0){ // only first paragraph
-            definition = definition.substring(1, definition.length());
+    String getDefinition(String mxml) {
+        String xml = extractText(mxml); // clear xml tags
+        //reduce to first paragraph
+        try {
+            while (xml.indexOf("\n") == 0) {
+                xml = xml.substring(1, xml.length());
+            }
+            xml = xml.substring(0, xml.indexOf("\n"));
+        } catch (Exception e) {
+
         }
-        definition = definition.substring(0, definition.indexOf("\n"));
-        definition = definition.replaceAll("'''", "\"");
-        definition = definition.replaceAll("''", "\"");
-        definition = definition.replaceAll("\\s*\\([^)]*\\)", ""); // remove brackets
-        definition = definition.replaceAll("&lt;ref&gt;\\[[^)]*\\]&lt;\\/ref&gt;", ""); // remove ref links
-        return definition;
+        //TODO besser machen  nochmal durch jsoup jagen..?
+        Document doc = Jsoup.parse(xml);
+        //System.out.println(doc.text().trim());
+        xml = doc.text().trim();
+        //remove html artifacts
+        xml = xml.replaceAll("(<ref>)([^<>]*  )(</ref>)", "")
+                .replaceAll("(<ref([^<>]*)>)([^<>]*)(</ref>)", "")
+                .replaceAll("<!--(.*)-->", "")
+                .replaceAll("'''", "\"")
+                .replaceAll("''", "\"")
+                .replaceAll("\\[\\]", "")
+                .replaceAll("\\(\\)", "")
+                .replaceAll(" ; ", "")
+        ;
+        return xml;
     }
 }

@@ -1,9 +1,10 @@
 package wikiAPI;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
+
 import static java.lang.StrictMath.round;
 
 class localfileHelper extends Thread {
@@ -14,6 +15,7 @@ class localfileHelper extends Thread {
                 errors = 0;
     private long chunksize;
     private RandomAccessFile file;
+
 
     localfileHelper(String path, int threadid, int threadcount, int max) throws IOException {
         this.id = threadid;
@@ -26,9 +28,13 @@ class localfileHelper extends Thread {
         }
     }
 
+
     @Override
     public void run() {
-        String article = "",
+        //umorganisieren?
+        xmlHelper xml = new xmlHelper();
+        textHelper text = new textHelper();
+        String page = "",
                 line,
                 stoppingreason = "chunkend reached!";
         long start = 0,
@@ -40,10 +46,9 @@ class localfileHelper extends Thread {
             file.seek(chunksize * (id));
             while (true) {
                 pos = file.getChannel().position();
-                //threadprocess
-                //System.out.println(threadnr+" : " + pos+ " " + chunksize*threadnr);
                 if ((line = file.readLine()) == (null) || pos >= stop)  break;
-                if (line.contains("<page id=")) {
+                //if (line.contains("<page id=")) { //fuer uni daten
+                if (line.contains("<page>")) {
                     pages++;
                     if (pages == 1) start = file.getChannel().position();
                     if (pages > max) {
@@ -52,14 +57,17 @@ class localfileHelper extends Thread {
                     }
                     line = file.readLine();
                     while (!line.contains("</page>")) {
-                        article += line + "\n";
+                        page += line + "\n";
                         line = file.readLine();
                     }
-                    //TODO: create definition and store to db?
-                    getDefinition(article);
-                    //xmlHelper xml= new xmlHelper();
-                    //System.out.println(xml.getTagValue(article, "title") + " : " + getDefinition(article));
-                    article = "";
+                    String article = xml.getTagValue(page, "text");
+                    String title = xml.getTagValue(page, "title");
+                    String definition = text.getDefinition(article);
+                    if (evaluateDefinition(definition)) {
+                        //TODO to db?
+                        System.out.println(title + " : " + definition);
+                    }
+                    page = "";
                 }
             }
             file.close();
@@ -70,34 +78,17 @@ class localfileHelper extends Thread {
         }
     }
 
-    private String getDefinition(String article) throws Exception {
-        //TODO: absatz besser extrahieren, encoding...
-        String definition;
-        definition = new String(article.getBytes("UTF-8"));
-        //cut definition
-        if (article.indexOf("\n\n") > 0) {
-            definition = definition.substring(0, article.indexOf("\n\n"));
-        }
-        Document doc = Jsoup.parse(definition);
-        definition = doc.select("text").text().trim()
-                //        .replaceAll("(\\[http://)([^\\[\\]]*)(\\])", "")
-                .replaceAll("\\[ \\]", "")
-                .replaceAll("\\( \\)", "")
-                .replaceAll(" ; ", "")
-                //wtf?! wozu benutz ich denn einen parser...
-                .replaceAll("Ã¼", "ü")
-                .replaceAll("Ã¤", "ä")
-                .replaceAll("Ã¶", "ö")
-                .replaceAll("Ã\u009F", "ß")
-        ;
-        //blacklist
+
+    private boolean evaluateDefinition(String definition) {
         if (definition.length() < 50 || definition.length() > 2000) {
             errors++;
-            return "";
+            return false;
+        } else {
+            definitions++;
+            return true;
         }
-        definitions++;
-        return new String(definition.getBytes("UTF-8"));
     }
+
 
     private void printStats(String reason, long time, long start, long stop) {
         System.out.println(
@@ -105,7 +96,7 @@ class localfileHelper extends Thread {
                         "\n" + round((stop - start)/1000.) + "kB from:\t\t" + start + " to " + stop +
                         "\nTime (in millis):\t" + time + " (" + round(time/1000.) + " s)"+
                         "\nProcessed pages:\t" + (definitions + errors) + " (" + pages + "found)"+
-                        "\nDefGen coverage:\t" + round((definitions / (pages * 1.) * 100.)) +
+                                "\nDefGen coverage:\t" + round((definitions / ((definitions + errors) * 1.) * 100.)) +
                         "% (+" + definitions + "/ -" + errors + ")"
                         );
     }
@@ -114,13 +105,13 @@ class localfileHelper extends Thread {
 
 class filetest {
     public static void main(String[] args) throws IOException {
-        int threadnr = 4;
-        int maxpages = 100;
+        int threadnr = 1;
+        int maxpages = 10;
         if(threadnr >Runtime.getRuntime().availableProcessors()){
             threadnr=Runtime.getRuntime().availableProcessors();
         }
 
-        String path = "C:\\Users\\rene2\\Desktop\\dewiki.xml";
+        String path = "C:\\Users\\rene2\\Desktop\\dewikidump.xml";
         //spawns and starts threads
         ArrayList<localfileHelper> threads = new ArrayList<>();
         for (int i = 0; i < threadnr; i++) {
