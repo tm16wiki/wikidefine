@@ -46,7 +46,8 @@ class localfileHelper extends Thread {
             file.seek(chunksize * (id));
             while (true) {
                 pos = file.getChannel().position();
-                if ((line = file.readLine()) == (null) || pos >= stop)  break;
+
+                if ((line = file.readLine()) == (null) || pos >= stop) break;
                 //if (line.contains("<page id=")) { //fuer uni daten
                 if (line.contains("<page>")) {
                     pages++;
@@ -55,15 +56,16 @@ class localfileHelper extends Thread {
                         stoppingreason = "max sites parsed!";
                         break;
                     }
-                    line = file.readLine();
-                    while (!line.contains("</page>")) {
+                    line = readLineUTF();
+                    while (!line.contains("</page>") & !(line == null)) {
                         page += line + "\n";
-                        line = file.readLine();
+                        //line = file.readLine();
+                        line = readLineUTF();
                     }
                     String article = xml.getTagValue(page, "text");
                     String title = xml.getTagValue(page, "title");
                     String definition = text.getDefinition(article);
-                    if (!evaluateDefinition(definition)) {
+                    if (evaluateDefinition(definition)) {
                         //TODO to db?
                         System.out.println(title + " : " + definition);
                     }
@@ -75,6 +77,31 @@ class localfileHelper extends Thread {
             printStats(stoppingreason, System.currentTimeMillis() - startTime, start, pos);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    private String readLineUTF() {
+        //TODO buffergröße seehr wichtig für performance
+        try {
+            String l = "";
+            long pos = file.getChannel().position();
+            do {
+                byte[] c = new byte[128];
+                for (int i = 0; i < 128; i++) {
+                    c[i] = (byte) file.read();
+                }
+                l += new String(c, "UTF-8");
+                if (l.contains("\n")) {
+                    break;
+                }
+            } while (true);
+            l = l.substring(0, l.indexOf("\n"));
+            file.getChannel().position(pos + l.getBytes().length + 1); //schneller als file.seek ..
+            return l;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -106,7 +133,7 @@ class localfileHelper extends Thread {
 class filetest {
     public static void main(String[] args) throws IOException {
         int threadnr = 1;
-        int maxpages = 100;
+        int maxpages = 50;
         if(threadnr >Runtime.getRuntime().availableProcessors()){
             threadnr=Runtime.getRuntime().availableProcessors();
         }

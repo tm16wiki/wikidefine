@@ -112,7 +112,7 @@ class textHelper {
 
     ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
-        //TODO infoboxen und {| class... |} richtig entfernen
+        //TODO infoboxen und {| class... |} richtig extrahieren
         //2 stufig um verschachtelung von objekten aufzuloesen
         for(int i=0; i<2; i++){
             String pattern = "\\{\\{([^{}]*)\\}\\}";
@@ -133,15 +133,13 @@ class textHelper {
 
 
     private String extractText(String article) {
-
-        //remove html comments
-        String extract = article.replaceAll("<!--(.*)-->", "")
-                //remove category tag
-                .replaceAll("(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])", "")
+        String extract = article
+                .replaceAll("<!--(.*)-->", "")
                 //remove files
-                .replaceAll("(\\[\\[)Datei:(.*)(\\]\\])", "")
+                .replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                 //remove wikipediaClasses
-                .replaceAll("\\{\\| class=&quot;(\\w*)&quot;", "");
+                .replaceAll("\\{\\| (\\w*)=(.*)", "")
+                .replaceAll("(\\{\\{Infobox)(.*)(\\}\\})", "");
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
         Matcher m = r.matcher(extract);
@@ -158,7 +156,7 @@ class textHelper {
         }
 
         //remove wikipediaobjects
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             String pattern = "(\\{\\{)([^\\{\\}]*)(\\}\\})";
             r = Pattern.compile(pattern);
             m = r.matcher(extract);
@@ -179,22 +177,33 @@ class textHelper {
             }
             xml = xml.substring(0, xml.indexOf("\n"));
         } catch (Exception e) {
-            e.printStackTrace();
+            return "";
         }
-        //TODO besser machen als nochmal durch jsoup jagen..?
+        //*
+        //TODO besser machen als nochmal durch jsoup jagen..? was ist bei artikel Erich Kästner oder Dickdarm passiert?
         Document doc = Jsoup.parse(xml);
         //System.out.println(doc.text().trim());
         xml = doc.text().trim();
+
+        if (xml.indexOf("#") == 0 || xml.indexOf("[[") == 0) {
+            return "";
+        }
         //remove html artifacts
-        xml = xml.replaceAll("(<ref>)([^<>]*  )(</ref>)", "")
-                .replaceAll("(<ref([^<>]*)>)([^<>]*)(</ref>)", "")
-                .replaceAll("<!--(.*)-->", "")
+        xml = xml.replaceAll("(<ref([^\\<\\>]*)?>)([^\\<\\>]* )(</ref>)", "")
+                .replaceAll("(<(.*)>)([^\\<\\>]*)(</(.*)>)", "")
+                .replaceAll("<(.*)>", "")
                 .replaceAll("'''", "\"")
                 .replaceAll("''", "\"")
+                //artefaktentfernung
+                .replaceAll("&nbsp;", "")
+                .replaceAll("&shy;", "")
+                .replaceAll("\"\" ", "")
                 .replaceAll("\\[\\]", "")
                 .replaceAll("\\(\\)", "")
                 .replaceAll(" ; ", "")
+                .replaceAll("�", "");
         ;
+        //*/
         return xml;
     }
 }

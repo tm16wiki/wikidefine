@@ -9,6 +9,16 @@ import java.security.NoSuchAlgorithmException;
 
 class xmlHelper {
 
+    private static String sha1(String input) throws NoSuchAlgorithmException {
+        MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+        byte[] result = mDigest.digest(input.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte aResult : result) {
+            sb.append(Integer.toString((aResult & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
+    }
+
     String getTagValue(String xml, String tagName){
         try {
             String s = xml.split("<"+tagName)[1].split("</" + tagName + ">")[0];
@@ -42,16 +52,6 @@ class xmlHelper {
             e.printStackTrace();
         }
         return getTagValue1(xml, "sha1");
-    }
-
-    private static String sha1(String input) throws NoSuchAlgorithmException {
-        MessageDigest mDigest = MessageDigest.getInstance("SHA1");
-        byte[] result = mDigest.digest(input.getBytes());
-        StringBuilder sb = new StringBuilder();
-        for (byte aResult : result) {
-            sb.append(Integer.toString((aResult & 0xff) + 0x100, 16).substring(1));
-        }
-        return sb.toString();
     }
 
 }
