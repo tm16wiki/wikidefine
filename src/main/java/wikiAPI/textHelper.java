@@ -10,21 +10,6 @@ import java.util.regex.Pattern;
 
 class textHelper {
 
-    // -{{Begriffsklärungshinweis}} -> flag mehrdeutig
-    // *{{Siehe-auch|Liste-von-Straßen-und-Plätzen-in-Leipzig}} tags
-    // *{{Hauptartikel|Geschichte-der-Stadt-Leipzig}}
-    // *{{Infobox-...
-    // *{{Nachbargemeinden...
-    // *{{Panorama|
-    // *{|-class=&quot;wikitable&quot;...
-    // *{{Wahldiagramm... {{Sitzverteilung
-    // -Links &lt;ref&gt;[URL text]datum&lt;/ref&gt;
-    // *
-    // *{{Internetquelle |url...
-    // *&amp;nbsp;
-    // *{{Zitat|...
-
-
     ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
         String pattern = "(\\[\\[)Datei:(.*)(\\]\\])";
@@ -82,12 +67,10 @@ class textHelper {
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         while (m.find()) {
-            categories.add(
-                    m.group()
+            categories.add( m.group()
                             .replace("[[", "")
                             .replace("]]", "")
                             .replace("Kategorie:", "")
-                            //TODO: Überkategorie?
                             .replace("|", "")
             );
         }
@@ -97,8 +80,6 @@ class textHelper {
 
     ArrayList<String> findWeblinks(String text) {
         ArrayList<String> weblinks = new ArrayList<>();
-        //"&lt;ref([^\\[]*)&gt;\\[http://([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;" link ohne http://
-
         String pattern = "&lt;ref([^\\[]*)&gt;\\[([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
@@ -113,6 +94,19 @@ class textHelper {
     ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
         //TODO infoboxen und {| class... |} richtig extrahieren
+        // -{{Begriffsklärungshinweis}} -> flag mehrdeutig
+        // *{{Siehe-auch|Liste-von-Straßen-und-Plätzen-in-Leipzig}} tags
+        // *{{Hauptartikel|Geschichte-der-Stadt-Leipzig}}
+        // *{{Infobox-...
+        // *{{Nachbargemeinden...
+        // *{{Panorama|
+        // *{|-class=&quot;wikitable&quot;...
+        // *{{Wahldiagramm... {{Sitzverteilung
+        // -Links &lt;ref&gt;[URL text]datum&lt;/ref&gt;
+        // *
+        // *{{Internetquelle |url...
+        // *&amp;nbsp;
+        // *{{Zitat|...
         //2 stufig um verschachtelung von objekten aufzuloesen
         for(int i=0; i<2; i++){
             String pattern = "\\{\\{([^{}]*)\\}\\}";
@@ -133,6 +127,10 @@ class textHelper {
 
 
     private String extractText(String article) {
+        if(article==null){
+            return null;
+        }
+
         String extract = article
                 .replaceAll("<!--(.*)-->", "")
                 //remove files
@@ -179,10 +177,7 @@ class textHelper {
         } catch (Exception e) {
             return "";
         }
-        //*
-        //TODO besser machen als nochmal durch jsoup jagen..? was ist bei artikel Erich Kästner oder Dickdarm passiert?
         Document doc = Jsoup.parse(xml);
-        //System.out.println(doc.text().trim());
         xml = doc.text().trim();
 
         if (xml.indexOf("#") == 0 || xml.indexOf("[[") == 0) {
@@ -202,8 +197,6 @@ class textHelper {
                 .replaceAll("\\(\\)", "")
                 .replaceAll(" ; ", "")
                 .replaceAll("�", "");
-        ;
-        //*/
         return xml;
     }
 }
