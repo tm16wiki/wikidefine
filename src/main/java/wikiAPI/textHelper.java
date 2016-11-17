@@ -183,20 +183,23 @@ class textHelper {
         if (xml.indexOf("#") == 0 || xml.indexOf("[[") == 0) {
             return "";
         }
+
         //remove html artifacts
-        xml = xml.replaceAll("(<ref([^\\<\\>]*)?>)([^\\<\\>]* )(</ref>)", "")
-                .replaceAll("(<(.*)>)([^\\<\\>]*)(</(.*)>)", "")
-                .replaceAll("<(.*)>", "")
-                .replaceAll("'''", "\"")
-                .replaceAll("''", "\"")
-                //artefaktentfernung
-                .replaceAll("&nbsp;", "")
-                .replaceAll("&shy;", "")
-                .replaceAll("\"\" ", "")
-                .replaceAll("\\[\\]", "")
-                .replaceAll("\\(\\)", "")
-                .replaceAll(" ; ", "")
-                .replaceAll("�", "");
+        xml = xml.replaceAll("(<ref([^\\<\\>]*)?>)([^\\<\\>]* *)(<\\/ref>)", "");
+        // remove brackets and content in brackets
+        xml = xml.replaceAll("\\s*\\([^)]*\\)", "");
+        xml = xml.replaceAll("(<(.*)>)([^\\<\\>]*)(</(.*)>)", "");
+        xml = xml.replaceAll("<(.*)>", "");
+        xml = xml.replaceAll("'''", "\"");
+        xml = xml.replaceAll("''", "\"");
+        //artefaktentfernung
+        xml = xml.replaceAll("&nbsp;", "");
+        xml = xml.replaceAll("&shy;", "");
+        xml = xml.replaceAll("\"\" ", "");
+        xml = xml.replaceAll("\\[\\]", "");
+        xml = xml.replaceAll("\\(\\)", "");
+        xml = xml.replaceAll(" ; ", "");
+        xml = xml.replaceAll("�", "");
         return xml;
     }
 }
