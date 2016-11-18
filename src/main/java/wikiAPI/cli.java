@@ -42,7 +42,7 @@ public class cli {
         //text.findWikiObject(content).forEach(System.out::println);
 
         //whole content
-        //System.out.println(text.clearXML(content));
+        System.out.println(text.extractText(content));
 
         //Test Definition
         System.out.println("\n\n"+text.getDefinition(content));

@@ -32,7 +32,11 @@ class xmlHelper {
     private String getTagValue1(String xml, String tagName){
         Document doc = Jsoup.parse(xml);
         //System.out.println(doc.select( tagName).first().text() + " || " + doc.select( tagName).first().ownText());
-        return doc.select(tagName).first().html();
+        try {
+            return doc.select(tagName).first().html();
+        }catch (NullPointerException e){
+            return getTagValue(xml, "username");
+        }
     }
 
     String getUser(String xml){

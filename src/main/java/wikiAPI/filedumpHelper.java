@@ -21,7 +21,6 @@ class filedumpHelper {
         }
         for (fileThread thread : threads) {
             thread.start();
-            thread.join();
         }
     }
 }
@@ -40,7 +39,6 @@ class fileThread extends Thread {
         this.id = threadid;
         this.pages = pages;
         this.max = max;
-
         try {
             file = new RandomAccessFile(path, "r");
             this.chunksize = (file.getChannel().size() / threadcount);
@@ -53,7 +51,6 @@ class fileThread extends Thread {
     public synchronized void run() {
         xmlHelper xml = new xmlHelper();
         textHelper text = new textHelper();
-
         String page = "",
                 line;
         long start = 0,
@@ -75,13 +72,15 @@ class fileThread extends Thread {
                     line = readLineUTF();
                     boolean reject = false;
                     while (!line.contains("</page>") & !(line == null)) {
+
                         //prefilter for lists or redirects
-                        if (line.contains("#REDIRECT") || line.contains("<title>List")) {
-                            page += "</text>";
+                        if (line.contains("#REDIRECT") || line.contains("#WEITERLEITUNG")|| line.contains("<title>List")) {
+                            page += "FILTERED</text>";
                             filtered++;
                             reject = true;
                             break;
                         }
+
                         page += line + "\n";
                         //line = file.readLine();
                         line = readLineUTF();
@@ -93,7 +92,7 @@ class fileThread extends Thread {
                         //postevaluate
                         if (evaluateDefinition(definition)) {
                             //TODO to db?
-                            //System.out.println(title + " : " + definition);
+                            System.out.println(title + " : " + definition);
                         }
                     }
                     page = "";
@@ -129,8 +128,9 @@ class fileThread extends Thread {
         }
     }
 
+
     private boolean evaluateDefinition(String definition) {
-        if (definition.length() < 50 || definition.length() > 2000) {
+        if (definition.length() < 50 || definition.length() > 3000) {
             errors++;
             return false;
         } else {
@@ -149,10 +149,9 @@ class fileThread extends Thread {
 }
 
 class filetest{
-
     public static void main(String[] args){
         try {
-            new filedumpHelper(2, 10);
+            new filedumpHelper(4, 400);
         } catch (Exception e) {
             e.printStackTrace();
         }

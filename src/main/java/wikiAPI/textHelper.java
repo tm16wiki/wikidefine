@@ -94,21 +94,8 @@ class textHelper {
     ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
         //TODO infoboxen und {| class... |} richtig extrahieren
-        // -{{Begriffsklärungshinweis}} -> flag mehrdeutig
-        // *{{Siehe-auch|Liste-von-Straßen-und-Plätzen-in-Leipzig}} tags
-        // *{{Hauptartikel|Geschichte-der-Stadt-Leipzig}}
-        // *{{Infobox-...
-        // *{{Nachbargemeinden...
-        // *{{Panorama|
-        // *{|-class=&quot;wikitable&quot;...
-        // *{{Wahldiagramm... {{Sitzverteilung
-        // -Links &lt;ref&gt;[URL text]datum&lt;/ref&gt;
-        // *
-        // *{{Internetquelle |url...
-        // *&amp;nbsp;
-        // *{{Zitat|...
-        //2 stufig um verschachtelung von objekten aufzuloesen
-        for(int i=0; i<2; i++){
+        //4 stufig um verschachtelung von objekten aufzuloesen
+        for(int i=0; i<4; i++){
             String pattern = "\\{\\{([^{}]*)\\}\\}";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(text);
@@ -126,18 +113,15 @@ class textHelper {
     }
 
 
-    private String extractText(String article) {
+     String extractText(String article) {
         if(article==null){
             return null;
         }
 
         String extract = article
                 .replaceAll("<!--(.*)-->", "")
-                //remove files
-                .replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                 //remove wikipediaClasses
-                .replaceAll("\\{\\| (\\w*)=(.*)", "")
-                .replaceAll("(\\{\\{Infobox)(.*)(\\}\\})", "");
+                .replaceAll("\\{\\| (\\w*)=(.*)", "");
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
         Matcher m = r.matcher(extract);
@@ -152,16 +136,21 @@ class textHelper {
                 extract = extract.replace(m.group(), m.group(2));
             }
         }
+        //remove files
+        extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
+                         .replaceAll("&lt;!--(.*)--&gt;", "");
 
         //remove wikipediaobjects
-        for (int i = 0; i < 2; i++) {
-            String pattern = "(\\{\\{)([^\\{\\}]*)(\\}\\})";
-            r = Pattern.compile(pattern);
+        //4 level deep e.g. infoboxes
+        for (int i = 0; i < 4; i++) {
+            r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
             m = r.matcher(extract);
             while (m.find()) {
                 extract = extract.replace(m.group(), "");
             }
         }
+        //e.g. infobox with math
+        extract = extract.replaceAll("(\\{\\{)(.*)(\\}\\})", "");
         return extract;
     }
 
@@ -177,12 +166,9 @@ class textHelper {
         } catch (Exception e) {
             return "";
         }
+
         Document doc = Jsoup.parse(xml);
         xml = doc.text().trim();
-
-        if (xml.indexOf("#") == 0 || xml.indexOf("[[") == 0) {
-            return "";
-        }
 
         //remove html artifacts
         xml = xml.replaceAll("(<ref([^\\<\\>]*)?>)([^\\<\\>]* *)(<\\/ref>)", "");
