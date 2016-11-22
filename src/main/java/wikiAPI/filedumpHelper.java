@@ -15,7 +15,7 @@ class filedumpHelper {
         }
         ArrayList<fileThread> threads = new ArrayList<>();
         for (int i = 0; i < threadnr; i++) {
-            String path = "/home/rene2u9/textmining/dewikidumpsmall.xml";
+            String path = "/home/user/Downloads/dewikidump.xml";
             threads.add(new fileThread(path, i, threadnr, 0, (maxpages / threadnr)));
         }
         for (fileThread thread : threads) {
@@ -74,7 +74,7 @@ class filedumpHelper {
                         while (!line.contains("</page>") & !(line == null)) {
 
                             //TODO: prefilter for lists or redirects
-                            if (line.contains("#REDIRECT") || line.contains("#WEITERLEITUNG") || line.contains("<title>List")) {
+                            if (line.contains("#REDIRECT") || line.contains("#WEITERLEITUNG") || line.contains("<title>List") || line.contains("#redirect")) {
                                 page += "FILTERED</text>";
                                 filtered++;
                                 reject = true;

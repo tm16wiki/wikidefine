@@ -17,7 +17,7 @@ class textHelper {
         Matcher m = r.matcher(text);
         while (m.find()) {
             String file = m.group();
-            //TODO: filetags finden?
+            //todo: filetags finden?
             //removes picturetags and text from file tag
             if (file.contains("|")) {
                 file = file.substring(0, file.indexOf("|"));
@@ -93,7 +93,7 @@ class textHelper {
 
     ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
-        //TODO infoboxen und {| class... |} richtig extrahieren
+        //todo infoboxen und {| class... |} richtig extrahieren
         //4 stufig um verschachtelung von objekten aufzuloesen
         for(int i=0; i<4; i++){
             String pattern = "\\{\\{([^{}]*)\\}\\}";
@@ -118,10 +118,12 @@ class textHelper {
             return null;
         }
 
-        String extract = article
-                .replaceAll("<!--(.*)-->", "")
-                //remove wikipediaClasses
-                .replaceAll("\\{\\| (\\w*)=(.*)", "");
+	//TODO: remove all < > </ > tags
+        String extract = article.replaceAll("<!--(.*)-->", "");
+        extract = extract.replaceAll("ref(.*)/ref", "");
+        extract = extract.replaceAll("math(.*)/math", "");
+        
+        //TODO: remove all [[ ]] tags
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
         Matcher m = r.matcher(extract);
@@ -140,6 +142,7 @@ class textHelper {
         extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                          .replaceAll("&lt;!--(.*)--&gt;", "");
 
+	//TODO: remove all {{ }} tags
         //remove wikipediaobjects
         //4 level deep e.g. infoboxes
         for (int i = 0; i < 4; i++) {
@@ -149,48 +152,38 @@ class textHelper {
                 extract = extract.replace(m.group(), "");
             }
         }
-        //e.g. infobox with math
-        extract = extract.replaceAll("(\\{\\{)(.*)(\\}\\})", "");
+        //wikiclasses
+        extract = extract.replaceAll("(\\{\\|)(.*)(\\|\\})", "");
+        
+        //TODO: remove artifacts
+        // remove brackets and content in brackets
+        extract = extract.replaceAll("'''", "\"");
+        extract = extract.replaceAll("''", "\"");
+        
+        extract = extract.replaceAll("&nbsp;", "");
+        extract = extract.replaceAll("&shy;", "");
+        extract = extract.replaceAll(" ; ", "");
+        extract = extract.replaceAll("�", "");
+        
+        extract = extract.replaceAll("<(.*)>", "");
+        extract = extract.replaceAll("\\s*\\([^)]*\\)", "");
+        extract = extract.replaceAll("\"\" ", "");
+        extract = extract.replaceAll("\\[\\]", "");
+        extract = extract.replaceAll("\\(\\)", "");
+        
+        
         return extract;
     }
 
 
     String getDefinition(String article) {
-        String xml = extractText(article); // clear xml tags
-        //reduce to first paragraph
-        try {
-            while (xml.indexOf("\n") == 0) {
-                xml = xml.substring(1, xml.length());
-            }
-            xml = xml.substring(0, xml.indexOf("\n"));
-        } catch (Exception e) {
-            return "";
-        }
+        article = extractText(article); // clear article tags
 
-        Document doc = Jsoup.parse(xml);
-        xml = doc.text().trim();
-
-        //remove html artifacts
-        xml = xml.replaceAll("(<ref([^\\<\\>]*)?>)([^\\<\\>]* *)(<\\/ref>)", "");
-        // remove brackets and content in brackets
-        xml = xml.replaceAll("\\s*\\([^)]*\\)", "");
-        xml = xml.replaceAll("(<(.*)>)([^\\<\\>]*)(</(.*)>)", "");
-        xml = xml.replaceAll("<(.*)>", "");
-        xml = xml.replaceAll("'''", "\"");
-        xml = xml.replaceAll("''", "\"");
-        //artefaktentfernung
-        xml = xml.replaceAll("&nbsp;", "");
-        xml = xml.replaceAll("&shy;", "");
-        xml = xml.replaceAll("\"\" ", "");
-        xml = xml.replaceAll("\\[\\]", "");
-        xml = xml.replaceAll("\\(\\)", "");
-        xml = xml.replaceAll(" ; ", "");
-        xml = xml.replaceAll("�", "");
 
         // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
         // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
         // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
-        String[] segs = xml.split( Pattern.quote( "." ) );
+        String[] segs = article.split( Pattern.quote( "." ) );
         String finalstr = "";
         for (int i = 0; i < segs.length; i++) {
             finalstr += segs[i] + ".";
