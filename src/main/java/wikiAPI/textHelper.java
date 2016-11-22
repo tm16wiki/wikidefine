@@ -186,6 +186,19 @@ class textHelper {
         xml = xml.replaceAll("\\(\\)", "");
         xml = xml.replaceAll(" ; ", "");
         xml = xml.replaceAll("�", "");
-        return xml;
+
+        // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
+        // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
+        // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
+        String[] segs = xml.split( Pattern.quote( "." ) );
+        String finalstr = "";
+        for (int i = 0; i < segs.length; i++) {
+            finalstr += segs[i] + ".";
+            if (finalstr.length() >= 300) {
+                break;
+            }
+        }
+
+        return finalstr;
     }
 }
