@@ -1,9 +1,6 @@
 package wikiAPI;
 
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,7 +90,7 @@ class textHelper {
 
     ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
-        //todo infoboxen und {| class... |} richtig extrahieren
+        //todo infoboxen und {| class... |} zu csv?
         //4 stufig um verschachtelung von objekten aufzuloesen
         for(int i=0; i<4; i++){
             String pattern = "\\{\\{([^{}]*)\\}\\}";
@@ -113,17 +110,17 @@ class textHelper {
     }
 
 
-     String extractText(String article) {
+    String extractText(String article) {
         if(article==null){
             return null;
         }
 
-	//TODO: remove all < > </ > tags
+        //remove all < > </ > tags
         String extract = article.replaceAll("<!--(.*)-->", "");
         extract = extract.replaceAll("ref(.*)/ref", "");
         extract = extract.replaceAll("math(.*)/math", "");
-        
-        //TODO: remove all [[ ]] tags
+
+        //remove all [[ ]] tags
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
         Matcher m = r.matcher(extract);
@@ -142,7 +139,7 @@ class textHelper {
         extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                          .replaceAll("&lt;!--(.*)--&gt;", "");
 
-	//TODO: remove all {{ }} tags
+        //remove all {{ }} tags
         //remove wikipediaobjects
         //4 level deep e.g. infoboxes
         for (int i = 0; i < 4; i++) {
@@ -153,25 +150,32 @@ class textHelper {
             }
         }
         //wikiclasses
-        extract = extract.replaceAll("(\\{\\|)(.*)(\\|\\})", "");
-        
-        //TODO: remove artifacts
+        //bessere regex finden
+        extract = extract.replaceAll("\n\\|(?:.*)", "");
+        extract = extract.replaceAll("\\{\\| class=(?:.*)", "");
+
+
+        //remove headline
+        extract = extract.replaceAll("== (.*) ==", "");
+
+        //remove artifacts
         // remove brackets and content in brackets
         extract = extract.replaceAll("'''", "\"");
         extract = extract.replaceAll("''", "\"");
-        
         extract = extract.replaceAll("&nbsp;", "");
         extract = extract.replaceAll("&shy;", "");
         extract = extract.replaceAll(" ; ", "");
         extract = extract.replaceAll("�", "");
-        
         extract = extract.replaceAll("<(.*)>", "");
         extract = extract.replaceAll("\\s*\\([^)]*\\)", "");
         extract = extract.replaceAll("\"\" ", "");
         extract = extract.replaceAll("\\[\\]", "");
         extract = extract.replaceAll("\\(\\)", "");
-        
-        
+
+        //TODO: Listen (z.b. Apollo)
+
+
+        extract = extract.replaceAll("\n", "");
         return extract;
     }
 
@@ -185,8 +189,8 @@ class textHelper {
         // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
         String[] segs = article.split( Pattern.quote( "." ) );
         String finalstr = "";
-        for (int i = 0; i < segs.length; i++) {
-            finalstr += segs[i] + ".";
+        for (String seg : segs) {
+            finalstr += seg + ".";
             if (finalstr.length() >= 300) {
                 break;
             }
