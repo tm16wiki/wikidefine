@@ -115,10 +115,15 @@ class textHelper {
             return null;
         }
 
+
+        //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
+
+
         //remove all < > </ > tags
         String extract = article.replaceAll("<!--(.*)-->", "");
         extract = extract.replaceAll("ref(.*)/ref", "");
         extract = extract.replaceAll("math(.*)/math", "");
+
 
         //remove all [[ ]] tags
         //remove articles keep text
@@ -139,10 +144,12 @@ class textHelper {
         extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                          .replaceAll("&lt;!--(.*)--&gt;", "");
 
+
         //remove all {{ }} tags
         //remove wikipediaobjects
         //4 level deep e.g. infoboxes
-        for (int i = 0; i < 4; i++) {
+        //todo: z.b. Talk (Mineral)
+        for (int i = 0; i < 5; i++) {
             r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
             m = r.matcher(extract);
             while (m.find()) {
@@ -155,15 +162,22 @@ class textHelper {
         extract = extract.replaceAll("\\{\\| class=(?:.*)", "");
 
 
+
         //remove headline
         extract = extract.replaceAll("== (.*) ==", "");
+        extract = extract.replaceAll("==", " ");
+
+
+
 
         //remove artifacts
         // remove brackets and content in brackets
         extract = extract.replaceAll("'''", "\"");
         extract = extract.replaceAll("''", "\"");
+        extract = extract.replaceAll("\"\"", "");
         extract = extract.replaceAll("&nbsp;", "");
         extract = extract.replaceAll("&shy;", "");
+        extract = extract.replaceAll("&amp;", "");
         extract = extract.replaceAll(" ; ", "");
         extract = extract.replaceAll("�", "");
         extract = extract.replaceAll("<(.*)>", "");
@@ -171,8 +185,9 @@ class textHelper {
         extract = extract.replaceAll("\"\" ", "");
         extract = extract.replaceAll("\\[\\]", "");
         extract = extract.replaceAll("\\(\\)", "");
+        extract = extract.replaceAll("&lt;(.*)&gt;", "");
+        extract = extract.replaceAll("__NOTOC__", "");
 
-        //TODO: Listen (z.b. Apollo)
 
 
         extract = extract.replaceAll("\n", "");
@@ -182,7 +197,6 @@ class textHelper {
 
     String getDefinition(String article) {
         article = extractText(article); // clear article tags
-
 
         // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
         // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
