@@ -1,4 +1,4 @@
-package wikiAPI;
+package helperClasses;
 
 
 import org.jsoup.Jsoup;
@@ -7,7 +7,7 @@ import org.jsoup.nodes.Document;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class xmlHelper {
+public class xml {
 
     private static String sha1(String input) throws NoSuchAlgorithmException {
         MessageDigest mDigest = MessageDigest.getInstance("SHA1");
@@ -19,7 +19,7 @@ class xmlHelper {
         return sb.toString();
     }
 
-    String getTagValue(String xml, String tagName){
+    public String getTagValue(String xml, String tagName) {
         try {
             String s = xml.split("<"+tagName)[1].split("</" + tagName + ">")[0];
             s = s.split(">")[1];
@@ -39,15 +39,15 @@ class xmlHelper {
         }
     }
 
-    String getUser(String xml){
+    public String getUser(String xml) {
         return getTagValue1(xml, "username");
     }
 
-    String getId(String xml){
+    public String getId(String xml) {
         return getTagValue1(xml,"id");
     }
 
-    String getChecksum(String xml){
+    public String getChecksum(String xml) {
         try {
             //TODO sha1 from _...?
             //System.out.println(sha1(xml));

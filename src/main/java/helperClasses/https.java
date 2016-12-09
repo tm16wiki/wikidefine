@@ -1,4 +1,4 @@
-package wikiAPI;
+package helperClasses;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -9,20 +9,20 @@ import java.net.URL;
 import java.security.cert.Certificate;
 import java.util.Date;
 
-class httpsHelper {
+public class https {
 
     private String content;
     private String certInfo;
-    private Certificate[] certs;
+    private Certificate[] certificates;
     private String URL;
     private Date timestamp;
 
 
-    httpsHelper() {
+    public https() {
 
     }
 
-    boolean loadURL(String https_url){
+    public boolean loadURL(String https_url) {
         this.URL = https_url;
         this.timestamp = new Date();
         URL url;
@@ -49,9 +49,9 @@ class httpsHelper {
             certInfo += "Response Code : " + con.getResponseCode();
             certInfo += "Cipher Suite : " + con.getCipherSuite();
             certInfo += "\n";
-            certs = con.getServerCertificates();
+            certificates = con.getServerCertificates();
             int i = 1;
-            for (Certificate cert : certs) {
+            for (Certificate cert : certificates) {
                 certInfo += "Certificate " + i++;
                 certInfo += "Cert Type : " + cert.getType();
                 certInfo += "Cert Hash Code : " + cert.hashCode();
@@ -76,23 +76,23 @@ class httpsHelper {
         content = new String(lines.getBytes(), "UTF-8");
     }
 
-    String getContent() {
+    public String getContent() {
         return content;
     }
 
-    String getCertInfo() {
+    public String getCertInfo() {
         return certInfo;
     }
 
-    String getURL() {
+    public String getURL() {
         return URL;
     }
 
-    Date getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    Certificate[] getCerts() {
-        return certs;
+    public Certificate[] getCertificates() {
+        return certificates;
     }
 }

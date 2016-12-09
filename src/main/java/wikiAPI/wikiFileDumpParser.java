@@ -1,5 +1,7 @@
 package wikiAPI;
 
+import helperClasses.xml;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -7,15 +9,20 @@ import java.util.ArrayList;
 import static java.lang.StrictMath.round;
 
 
-class filedumpHelper {
+public class wikiFileDumpParser {
+    private boolean printstats = false;
+    private boolean verbose = false;
+    private helperClasses.db db;
 
-    filedumpHelper(int threadnr, int maxpages) {
+    public wikiFileDumpParser(int threadnr, int maxpages, boolean printstats, boolean verbose, String path, helperClasses.db db) {
+        this.printstats = printstats;
+        this.verbose = verbose;
+        this.db = db;
         if (threadnr > Runtime.getRuntime().availableProcessors()) {
             threadnr = Runtime.getRuntime().availableProcessors();
         }
         ArrayList<fileThread> threads = new ArrayList<>();
         for (int i = 0; i < threadnr; i++) {
-            String path = "/home/user/Downloads/dewikidump.xml";
             threads.add(new fileThread(path, i, threadnr, 0, (maxpages / threadnr)));
         }
         for (fileThread thread : threads) {
@@ -48,8 +55,8 @@ class filedumpHelper {
 
         @Override
         public synchronized void run() {
-            xmlHelper xml = new xmlHelper();
-            textHelper text = new textHelper();
+            xml xml = new xml();
+            wikiTextParser text = new wikiTextParser();
             String page = "",
                     line;
             long start = 0,
@@ -74,7 +81,12 @@ class filedumpHelper {
                         while (!line.contains("</page>") & !(line == null)) {
 
                             //TODO: prefilter for lists or redirects
-                            if (line.contains("#REDIRECT") || line.contains("#WEITERLEITUNG") || line.contains("<title>List") || line.contains("#redirect")) {
+                            if (line.contains("#REDIRECT") ||
+                                    line.contains("#WEITERLEITUNG") ||
+                                    line.contains("<title>List") ||
+                                    line.contains("#redirect") ||
+                                    line.contains("#Redirect")
+                                    ) {
                                 page += "FILTERED</text>";
                                 filtered++;
                                 reject = true;
@@ -92,15 +104,21 @@ class filedumpHelper {
 
                             //TODO: postevaluate
                             if (evaluateDefinition(definition)) {
-                                System.out.println(title + " : " + definition);
+                                if (verbose) {
+                                    System.out.println(title + " : " + definition);
+                                }
+                                if (db != null) {
+                                    db.insertDefinition(title, definition);
+                                }
                             }
                         }
                         page = "";
                     }
                 }
                 file.close();
-                //Threadstats
-                printStats(System.currentTimeMillis() - startTime, start, pos);
+                if (printstats) {
+                    printStats(System.currentTimeMillis() - startTime, start, pos);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -146,11 +164,4 @@ class filedumpHelper {
                     "\n DefGen:\t" + round((definitions / ((definitions + errors) * 1.) * 100.)) + "%    \t\t+ " + definitions + "/ - " + errors + "");
         }
     }
-}
-
-
-class filetest{
-    public static void main(String[] args){
-        new filedumpHelper(1, 100);
-        }
 }

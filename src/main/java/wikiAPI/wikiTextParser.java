@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class textHelper {
+public class wikiTextParser {
 
-    ArrayList<String> findFiles(String text) {
+    public ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
         String pattern = "(\\[\\[)Datei:(.*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
@@ -30,7 +30,7 @@ class textHelper {
     }
 
 
-    ArrayList<String> findArticles(String text) {
+    public ArrayList<String> findArticles(String text) {
         ArrayList<String> articles = new ArrayList<>();
         //Regex für artikel [[ ... ]] ('[' und ']’ ausgeschlossen falls verschachtelt)
         String pattern = "(\\[\\[)([^:\\[\\]]*)(\\]\\])";
@@ -58,7 +58,7 @@ class textHelper {
     }
 
 
-    ArrayList<String> findCategories(String text) {
+    public ArrayList<String> findCategories(String text) {
         ArrayList<String> categories = new ArrayList<>();
         String pattern = "(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
@@ -75,7 +75,7 @@ class textHelper {
     }
 
 
-    ArrayList<String> findWeblinks(String text) {
+    public ArrayList<String> findWeblinks(String text) {
         ArrayList<String> weblinks = new ArrayList<>();
         String pattern = "&lt;ref([^\\[]*)&gt;\\[([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;";
         Pattern r = Pattern.compile(pattern);
@@ -88,7 +88,7 @@ class textHelper {
     }
 
 
-    ArrayList<String> findWikiObject(String text) {
+    public ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
         //todo infoboxen und {| class... |} zu csv?
         //4 stufig um verschachtelung von objekten aufzuloesen
@@ -105,22 +105,20 @@ class textHelper {
     }
 
 
-    boolean isPolysemous(String text) {
+    public boolean isPolysemous(String text) {
         return text.contains("{{Begriffsklärungshinweis}}");
     }
 
 
-    String extractText(String article) {
+    public String extractText(String article) {
         if(article==null){
             return null;
         }
-
-
         //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
 
 
         //remove all < > </ > tags
-        String extract = article.replaceAll("<!--(.*)-->", "");
+        String extract = article.replaceAll("!--(.*)--", "");
         extract = extract.replaceAll("ref(.*)/ref", "");
         extract = extract.replaceAll("math(.*)/math", "");
 
@@ -140,7 +138,7 @@ class textHelper {
                 extract = extract.replace(m.group(), m.group(2));
             }
         }
-        //remove files
+        //remove files categories
         extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
                          .replaceAll("&lt;!--(.*)--&gt;", "");
 
@@ -156,18 +154,18 @@ class textHelper {
                 extract = extract.replace(m.group(), "");
             }
         }
+
+
         //wikiclasses
+        //todo: z.B. Region Stuttgart, 1256
         //bessere regex finden
         extract = extract.replaceAll("\n\\|(?:.*)", "");
         extract = extract.replaceAll("\\{\\| class=(?:.*)", "");
 
 
-
-        //remove headline
+        //remove headlines
         extract = extract.replaceAll("== (.*) ==", "");
         extract = extract.replaceAll("==", " ");
-
-
 
 
         //remove artifacts
@@ -188,16 +186,15 @@ class textHelper {
         extract = extract.replaceAll("&lt;(.*)&gt;", "");
         extract = extract.replaceAll("__NOTOC__", "");
 
-
-
         extract = extract.replaceAll("\n", "");
         return extract;
     }
 
 
-    String getDefinition(String article) {
-        article = extractText(article); // clear article tags
+    public String getDefinition(String article) {
+        article = extractText(article);
 
+        //TODO: links werden abgeschnitten [http://www. in Rotaria (Titularbistum)
         // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
         // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
         // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
@@ -209,7 +206,6 @@ class textHelper {
                 break;
             }
         }
-
         return finalstr;
     }
 }
