@@ -44,7 +44,7 @@ public class configCLI {
             description = "creates definitions out of web")
     public void webdef() {
         try {
-            Shell webcli = ShellFactory.createSubshell("webdef", shell, "", new webDefCLI(config));
+            Shell webcli = ShellFactory.createSubshell("webdef", shell, "", new webDefCLI(this.config));
             System.out.println("\n====   COMMANDS   ====");
             webcli.processLine("?l");
             webcli.commandLoop();
@@ -58,7 +58,7 @@ public class configCLI {
             description = "creates all definitions out of file with max speed")
     public void filedump() {
         try {
-            Shell filecli = ShellFactory.createSubshell("filedump", shell, "", new fileDumpCLI(config));
+            Shell filecli = ShellFactory.createSubshell("filedump", shell, "", new fileDumpCLI(this.config));
             System.out.println("\n====   COMMANDS   ====");
             filecli.processLine("?l");
             filecli.commandLoop();
@@ -86,11 +86,11 @@ public class configCLI {
             while (rs.next()) {
                 results++;
                 System.out.println("loading configuration: " + rs.getString("name"));
-                CLI.config.setLang( rs.getString("language"));
-                CLI.config.setFilepath(rs.getString("file"));
-                CLI.config.setDbpath(rs.getString("exportdb"));
-                CLI.config.setDbuser(rs.getString("dbuser"));
-                CLI.config.setDbpassword(rs.getString("dbpassword"));
+                config.setLang( rs.getString("language"));
+                config.setFilepath(rs.getString("file"));
+                config.setDbpath(rs.getString("exportdb"));
+                config.setDbuser(rs.getString("dbuser"));
+                config.setDbpassword(rs.getString("dbpassword"));
             }
             if (results == 0) {
                 System.out.println("error loading configuration by id " + id);
@@ -111,11 +111,11 @@ public class configCLI {
             while (rs.next()) {
                 results++;
                 System.out.println("loading configuration: " + rs.getString("name"));
-                CLI.config.setLang( rs.getString("language"));
-                CLI.config.setFilepath(rs.getString("file"));
-                CLI.config.setDbpath(rs.getString("exportdb"));
-                CLI.config.setDbuser(rs.getString("dbuser"));
-                CLI.config.setDbpassword(rs.getString("dbpassword"));
+                config.setLang( rs.getString("language"));
+                config.setFilepath(rs.getString("file"));
+                config.setDbpath(rs.getString("exportdb"));
+                config.setDbuser(rs.getString("dbuser"));
+                config.setDbpassword(rs.getString("dbpassword"));
             }
             if (results == 0) {
                 System.out.println("error loading configuration "+ name);
