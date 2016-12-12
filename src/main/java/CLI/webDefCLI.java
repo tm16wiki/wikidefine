@@ -8,8 +8,8 @@ import helperClasses.https;
 import helperClasses.xml;
 import wikiAPI.wikiTextParser;
 
-public class webcli implements ShellDependent {
-    private static String lang;
+public class webDefCLI implements ShellDependent {
+    private static config config;
     private Shell theShell;
 
     private wikiTextParser text = new wikiTextParser();
@@ -17,11 +17,10 @@ public class webcli implements ShellDependent {
     private helperClasses.https https = new https();
 
 
-    public webcli(String lang) {
-        this.lang = lang;
-
+    webDefCLI(config config) {
+        this.config = config;
         System.out.println("====    CONFIG    ====");
-        System.out.println("language is set to: " + lang);
+        System.out.println("language is set to: " + config.getLang());
 
         System.out.println();
     }
@@ -39,7 +38,7 @@ public class webcli implements ShellDependent {
         term = term.replaceAll(" ", "_");
 
         String url;
-        switch (lang) {
+        switch (config.getLang()) {
             case "de":
                 url = "https://de.wikipedia.org/wiki/Spezial:Exportieren/";
                 break;
@@ -62,9 +61,8 @@ public class webcli implements ShellDependent {
             description = "prints webdump info of the article")
     public void webinfo(@Param(name = "article", description = "get info about this article") String term) {
         term = term.replaceAll(" ", "_");
-
         String url;
-        switch (lang) {
+        switch (config.getLang()) {
             case "de":
                 url = "https://de.wikipedia.org/wiki/Spezial:Exportieren/";
                 break;
@@ -82,12 +80,10 @@ public class webcli implements ShellDependent {
         System.out.println("articleurl:\t\t\t" + https.getURL());
         System.out.println("timestamp:\t\t\t" + https.getTimestamp().toString());
         //System.out.println("certinfo:\t\t\t" + https.getCertInfo());
-
         //xml info
         System.out.println("articleid:\t\t\t" + xml.getId(https.getContent()));
         System.out.println("creator:\t\t\t" + xml.getUser(https.getContent()));
         System.out.println("sha1sum:\t\t\t" + xml.getChecksum(https.getContent()));
-
         //Mining Info
         System.out.println("mehrdeutig:\t\t\t" + text.isPolysemous(content));
         System.out.println("weblinks:\t\t\t" + text.findWeblinks(content).size());
@@ -100,15 +96,15 @@ public class webcli implements ShellDependent {
         //text.findCategories(content).forEach(System.out::println);
         System.out.println("WikiObjects:\t\t" + text.findWikiObject(content).size());
         //text.findWikiObject(content).forEach(System.out::println);
-
-        System.out.println("cleaned content:\t" + text.extractText(content));
+        //whole content
+        //System.out.println("cleaned content:\t" + text.extractText(content));
     }
 
     @Command(name = "language",
             abbrev = "l",
             description = "sets language")
     public void setLang(@Param(name = "language", description = "new lang value") String lang) {
-        this.lang = lang;
+        this.config.setLang( lang);
     }
 
 }

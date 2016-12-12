@@ -7,7 +7,7 @@ import asg.cliche.ShellDependent;
 import helperClasses.db;
 import wikiAPI.wikiFileDumpParser;
 
-public class filecli implements ShellDependent {
+public class fileDumpCLI implements ShellDependent {
     private Shell theShell;
 
     private boolean stats;
@@ -19,16 +19,16 @@ public class filecli implements ShellDependent {
     private String dbpath;
     private db exportDB;
 
-    filecli(String filepath, db db) {
+    fileDumpCLI(config config) {
         this.stats = false;
         this.verbose = true;
         this.export = false;
         this.threads = 4;
         this.max = Integer.MAX_VALUE;
         this.filepath = filepath;
-        if (db != null) {
-            this.exportDB = db;
-            this.dbpath = db.getPath();
+        if (config.getDbpath() != null) {
+            this.exportDB = config.getDatabase();
+            this.dbpath = config.getDbpath();
         }
         showconfig();
     }

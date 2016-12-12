@@ -52,10 +52,6 @@ public class db {
         }
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public ResultSet execQuery(String query) {
         Statement stmt;
         try {
