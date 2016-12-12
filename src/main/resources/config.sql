@@ -1,4 +1,4 @@
-CREATE TABLE `config` (
+CREATE TABLE IF NOT EXISTS `config` (
 	`id`	INTEGER NOT NULL UNIQUE,
 	`name`	TEXT NOT NULL UNIQUE,
 	`language`	TEXT NOT NULL,
