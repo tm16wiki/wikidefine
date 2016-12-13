@@ -100,8 +100,8 @@ public class webDefCLI implements ShellDependent {
         //System.out.println("cleaned content:\t" + text.extractText(content));
     }
 
-    @Command(name = "language",
-            abbrev = "l",
+    @Command(name = "setlanguage",
+            abbrev = "sl",
             description = "sets language")
     public void setLang(@Param(name = "language", description = "new lang value") String lang) {
         this.config.setLang( lang);

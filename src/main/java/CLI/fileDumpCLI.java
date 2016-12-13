@@ -10,22 +10,17 @@ import wikiAPI.wikiFileDumpParser;
 public class fileDumpCLI implements ShellDependent {
     private Shell theShell;
 
-    private boolean stats;
-    private boolean verbose;
-    private boolean export;
-    private int max;
-    private int threads;
+    private boolean stats = false;
+    private boolean verbose = true;
+    private boolean export = true;
+    private int max = Integer.MAX_VALUE;;
+    private int threads = 4;
     private String filepath;
     private String dbpath;
     private db exportDB;
 
     fileDumpCLI(config config) {
-        this.stats = false;
-        this.verbose = true;
-        this.export = false;
-        this.threads = 4;
-        this.max = Integer.MAX_VALUE;
-        this.filepath = filepath;
+        this.filepath = config.getFilepath();
         if (config.getDbpath() != null) {
             this.exportDB = config.getDatabase();
             this.dbpath = config.getDbpath();
@@ -33,61 +28,8 @@ public class fileDumpCLI implements ShellDependent {
         showconfig();
     }
 
-
-    public void cliSetShell(Shell theShell) {
-        this.theShell = theShell;
-    }
-
-    @Command(name = "setverbose",
-            abbrev = "sv",
-            description = "sets verbose boolean")
-    public void setVerbose(@Param(name = "printverbose", description = "printverboseboolean") boolean verbose) {
-        this.verbose = verbose;
-        showconfig();
-    }
-
-    @Command(name = "setexport",
-            abbrev = "se",
-            description = "sets db export boolean")
-    public void setExport(@Param(name = "dbexport", description = "dbexportboolean") boolean export) {
-        this.export = export;
-        showconfig();
-    }
-
-    @Command(name = "setstats",
-            abbrev = "ss",
-            description = "stets statistics boolean")
-    public void setStats(@Param(name = "printstats", description = "printstatsboolean") boolean stats) {
-        this.stats = stats;
-        showconfig();
-    }
-
-    @Command(name = "setmax",
-            abbrev = "sm",
-            description = "sets max definition to generate")
-    public void setMax(@Param(name = "maximum", description = "max definitions generated") int max) {
-        this.max = max;
-        showconfig();
-    }
-
-    @Command(name = "setthreads",
-            abbrev = "st",
-            description = "stets number of threads to use")
-    public void setThreads(@Param(name = "threads", description = "amount of threads spawned") int threads) {
-        this.threads = threads;
-        showconfig();
-    }
-
-    @Command(name = "setpath",
-            abbrev = "sp",
-            description = "stets filepath")
-    public void setPath(@Param(name = "path", description = "filepath") String filepath) {
-        this.filepath = filepath;
-        showconfig();
-    }
-
-    @Command(name = "showconfig",
-            abbrev = "sc",
+    @Command(name = "config",
+            abbrev = "c",
             description = "prints current configuration")
     public void showconfig() {
         System.out.println("====    CONFIG    ====");
@@ -119,5 +61,57 @@ public class fileDumpCLI implements ShellDependent {
         new wikiFileDumpParser(Integer.MAX_VALUE, Integer.MAX_VALUE, stats, verbose, filepath, null);
     }
 
+
+
+    public void cliSetShell(Shell theShell) {
+        this.theShell = theShell;
+    }
+
+    @Command(name = "switchverbose",
+            abbrev = "sv",
+            description = "changes verbose boolean")
+    public void switchVerbose() {
+        this.verbose = !verbose;
+        showconfig();
+    }
+
+    @Command(name = "switchexport",
+            abbrev = "se",
+            description = "changes export boolean")
+    public void switchExport() {
+        this.export = !export;
+        showconfig();
+    }
+
+    @Command(name = "switchstats",
+            abbrev = "ss",
+            description = "changes statistics boolean")
+    public void switchStats() {
+        this.stats = !stats;
+        showconfig();
+    }
+
+    @Command(name = "settmax",
+            abbrev = "sm",
+            description = "sets max definition to generate")
+    public void setMax(@Param(name = "maximum", description = "max definitions generated") int max) {
+        this.max = max;
+        showconfig();
+    }
+    @Command(name = "setpath",
+            abbrev = "sp",
+            description = "stets filepath")
+    public void setPath(@Param(name = "path", description = "filepath") String filepath) {
+        this.filepath = filepath;
+        showconfig();
+    }
+
+    @Command(name = "setthreads",
+            abbrev = "st",
+            description = "stets number of threads to use")
+    public void setThreads(@Param(name = "threads", description = "amount of threads spawned") int threads) {
+        this.threads = threads;
+        showconfig();
+    }
 
 }

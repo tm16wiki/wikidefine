@@ -3,6 +3,7 @@ package CLI;
 import asg.cliche.*;
 import helperClasses.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +12,7 @@ import java.util.Scanner;
 public class configCLI {
     private static Shell shell;
 
-    private static db localdb;
+    private db localdb;
     private config config;
 
 
@@ -34,7 +35,7 @@ public class configCLI {
             System.out.println("\n====   COMMANDS   ====");
             shell.processLine("?l");
             shell.commandLoop();
-        } catch (CLIException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -68,38 +69,6 @@ public class configCLI {
     }
 
 
-    @Command(name = "deleteconfig",
-            abbrev = "dc",
-            description = "delete configuration")
-    public void delConfig(@Param(name = "id", description = "config id to load") int id) {
-        localdb.execQuery("delete from config where id='"+id+"';");
-    }
-
-    @Command(name = "loadconfig",
-            abbrev = "lc",
-            description = "load configuration")
-    public void loadconfig(@Param(name = "id", description = "config id to load") int id) {
-        ResultSet rs;
-        rs = localdb.execQuery("select * from config where id = '" + id + "';");
-        try {
-            int results = 0;
-            while (rs.next()) {
-                results++;
-                System.out.println("loading configuration: " + rs.getString("name"));
-                config.setLang( rs.getString("language"));
-                config.setFilepath(rs.getString("file"));
-                config.setDbpath(rs.getString("exportdb"));
-                config.setDbuser(rs.getString("dbuser"));
-                config.setDbpassword(rs.getString("dbpassword"));
-            }
-            if (results == 0) {
-                System.out.println("error loading configuration by id " + id);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Command(name = "loadconfig",
             abbrev = "lc",
             description = "load configuration")
@@ -111,11 +80,13 @@ public class configCLI {
             while (rs.next()) {
                 results++;
                 System.out.println("loading configuration: " + rs.getString("name"));
-                config.setLang( rs.getString("language"));
-                config.setFilepath(rs.getString("file"));
-                config.setDbpath(rs.getString("exportdb"));
-                config.setDbuser(rs.getString("dbuser"));
-                config.setDbpassword(rs.getString("dbpassword"));
+                this.config = new config(
+                        rs.getString("language"),
+                        rs.getString("file"),
+                        rs.getString("exportdb"),
+                        rs.getString("dbuser"),
+                        rs.getString("dbpassword")
+                );
             }
             if (results == 0) {
                 System.out.println("error loading configuration "+ name);
@@ -124,6 +95,15 @@ public class configCLI {
             e.printStackTrace();
         }
     }
+
+
+    @Command(name = "deleteconfig",
+            abbrev = "dc",
+            description = "delete configuration")
+    public void delConfig(@Param(name = "name", description = "config name to load") String name) {
+        localdb.execQuery("delete from config where name='"+name+"';");
+    }
+
 
     @Command(name = "newconfig",
             abbrev = "nc",
@@ -139,13 +119,13 @@ public class configCLI {
             String filepath = scan.nextLine();
             System.out.print("database: ");
             String dbpath = scan.nextLine();
-            String dbuser;
-            String dbpassword;
+            String dbuser = null;
+            String dbpassword = null;
             if (dbpath.equals("")) {
                 dbpath = null;
                 dbuser = null;
                 dbpassword = null;
-            }else{
+            }else if(dbpath.contains("postgresql://") || dbpath.contains("postgresql://")){
                 System.out.print("databaseuser: ");
                 dbuser = scan.nextLine();
                 System.out.print("databasepassword: ");
@@ -170,9 +150,13 @@ public class configCLI {
     public void listconfig() {
         ResultSet rs = localdb.execQuery("select * from config;");
         try {
+            System.out.println("id name:\t\tlang\tfile\t\t\tdb");
             while (rs.next()) {
-                System.out.print(rs.getInt("id") + "\t");
-                System.out.print(rs.getString("name") + "\t");
+                System.out.print(rs.getInt("id") + " ");
+                System.out.print(rs.getString("name") + ":\t\t");
+                if(rs.getString("name").length()%4 < 3){
+                    System.out.print("\t");
+                }
                 System.out.print(rs.getString("language") + "\t\t");
                 System.out.print(rs.getString("file") + "\t");
                 System.out.print(rs.getString("exportdb") + "\t");
@@ -199,11 +183,19 @@ class config {
 
     config(String lang, String filepath, String dbpath, String dbuser, String dbpasswort){
         config.lang = lang;
+        File f = new File(filepath);
         config.filepath = filepath;
         config.dbpath = dbpath;
         config.dbuser = dbuser;
         config.dbpassword = dbpasswort;
-        database = new db(dbpath);
+        if(dbpath.contains("postgresql://") || dbpath.contains("postgresql://")){
+            database = new  db(dbpath, dbuser, dbpasswort);
+        }else if (dbpath.equals("null")){
+            database = null;
+        }
+        else {
+            database = new db(dbpath);
+        }
     }
 
     static String getLang() {

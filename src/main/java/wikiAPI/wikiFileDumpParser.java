@@ -2,6 +2,8 @@ package wikiAPI;
 
 import helperClasses.xml;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -22,11 +24,17 @@ public class wikiFileDumpParser {
             threadnr = Runtime.getRuntime().availableProcessors();
         }
         ArrayList<fileThread> threads = new ArrayList<>();
-        for (int i = 0; i < threadnr; i++) {
-            threads.add(new fileThread(path, i, threadnr, 0, (maxpages / threadnr)));
-        }
-        for (fileThread thread : threads) {
-            thread.start();
+        try {
+            for (int i = 0; i < threadnr; i++) {
+                threads.add(new fileThread(new RandomAccessFile(path, "r"), i, threadnr, 0, (maxpages / threadnr)));
+            }
+            for (fileThread thread : threads) {
+                thread.start();
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("file not found!");
+        }catch (NullPointerException e){
+            System.out.println("file not found!");
         }
     }
 
@@ -41,12 +49,12 @@ public class wikiFileDumpParser {
         private long chunksize;
         private RandomAccessFile file;
 
-        fileThread(String path, int threadid, int threadcount, int pages, int max) {
+        fileThread(RandomAccessFile file, int threadid, int threadcount, int pages, int max) {
             this.id = threadid;
             this.pages = pages;
             this.max = max;
+            this.file = file;
             try {
-                file = new RandomAccessFile(path, "r");
                 this.chunksize = (file.getChannel().size() / threadcount);
             } catch (IOException e) {
                 e.printStackTrace();
