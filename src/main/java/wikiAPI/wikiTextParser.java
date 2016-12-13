@@ -4,8 +4,11 @@ package wikiAPI;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.HashMap;
 
 public class wikiTextParser {
+
 
     public ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
@@ -110,7 +113,7 @@ public class wikiTextParser {
     }
 
 
-    public String extractText(String article) {
+    private String extractText(String article) {
         if(article==null){
             return null;
         }
@@ -123,7 +126,7 @@ public class wikiTextParser {
 
         //remove all [[ ]] tags
         //remove articles keep text
-        Pattern r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
+        Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
         Matcher m = r.matcher(extract);
         while (m.find()) {
             String atext = m.group(2);
@@ -153,59 +156,89 @@ public class wikiTextParser {
             }
         }
 
+        String[][] replacements = {
+                //wikiclasses
+                //todo: z.B. Region Stuttgart, 1256
+                //bessere regex finden
+                {"\n\\|(?:.*)", ""},
+                {"\\{\\| class=(?:.*)", ""},
 
-        //wikiclasses
-        //todo: z.B. Region Stuttgart, 1256
-        //bessere regex finden
-        extract = extract.replaceAll("\n\\|(?:.*)", "");
-        extract = extract.replaceAll("\\{\\| class=(?:.*)", "");
+                //remove headlines
+                {"== (.*) ==", ""},
+                {"==", " "},
+                //remove links
+                {"\\[([^\\[]*)\\]", ""},
 
+                //remove artifacts
+                // remove brackets and content in brackets
+                {"'''", "\""},
+                {"''", "\""},
+                {"\"\"", ""},
+                {"&nbsp;", " "},
+                {"nbsp;", " "},
+                {"&shy;", ""},
+                {"&amp;", ""},
+                {" ; ", ""},
+                {"�", ""},
+                {"<(.*)>", ""},
+                {"^\\[", ""},
+                {"\\s*\\([^)]*\\)", ""},
+                {"\"\" ", ""},
+                {"\\[\\]", ""},
+                {"\\(\\)", ""},
+                {"&lt;(.*)&gt;", ""},
+                {"__NOTOC__", ""},
+                {"\n", ""},
+        };
 
-        //remove headlines
-        extract = extract.replaceAll("== (.*) ==", "");
-        extract = extract.replaceAll("==", " ");
+        return cleanString(extract, replacements).trim();
+    }
 
-        //remove links
-        extract = extract.replaceAll("\\[([^\\[]*)\\]", "");
-
-        //remove artifacts
-        // remove brackets and content in brackets
-        extract = extract.replaceAll("'''", "\"");
-        extract = extract.replaceAll("''", "\"");
-        extract = extract.replaceAll("\"\"", "");
-        extract = extract.replaceAll("&nbsp;", "");
-        extract = extract.replaceAll("&shy;", "");
-        extract = extract.replaceAll("&amp;", "");
-        extract = extract.replaceAll(" ; ", "");
-        extract = extract.replaceAll("�", "");
-        extract = extract.replaceAll("<(.*)>", "");
-        extract = extract.replaceAll("\\s*\\([^)]*\\)", "");
-        extract = extract.replaceAll("\"\" ", "");
-        extract = extract.replaceAll("\\[\\]", "");
-        extract = extract.replaceAll("\\(\\)", "");
-        extract = extract.replaceAll("&lt;(.*)&gt;", "");
-        extract = extract.replaceAll("__NOTOC__", "");
-
-        extract = extract.replaceAll("\n", "");
-        return extract;
+    private static String cleanString(String str, String[][] replacements) {
+        for (int i = 0; i < replacements.length; i++) {
+            // Todo: Pattern compile
+            str = str.replaceAll(replacements[i][0], replacements[i][1]);
+        }
+        return str;
     }
 
 
     public String getDefinition(String article) {
         article = extractText(article);
 
+
+
         //TODO: links werden abgeschnitten [http://www. in Rotaria (Titularbistum)
         // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
         // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
         // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
-        String[] segs = article.split( Pattern.quote( "." ) );
         String finalstr = "";
-        for (String seg : segs) {
-            finalstr += seg + ".";
-            if (finalstr.length() >= 300) {
-                break;
+        String[] segs = article.split( Pattern.quote( "." ) );
+        String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
+
+        for (int i = 0; i < segs.length; i++) {
+
+            // TODO: Catch IndexOutOfBounds Exception
+            if (finalstr.length() >= 300) { // pruefe ob satzende
+                if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) {
+                    // pruefe ob aktueller chunk neuer satz ist
+                    if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
+                            && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
+                            && !segs[i-1].substring(segs[i-1].length()-2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches(consonants+"*") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("(^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
+                            ) {
+                        break; // neuer satz soll nicht reingenommen werden
+                    } else { // noch kein satzende erreicht - weiter
+                        finalstr += segs[i] + ".";
+                    }
+                }
+            } else {
+                finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
             }
         }
+
         return finalstr;
     }
 }
