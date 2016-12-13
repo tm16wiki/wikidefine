@@ -119,14 +119,18 @@ public class wikiTextParser {
         }
         //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
         //remove all < > </ > tags
-        String extract = article.replaceAll("!--(.*)--", "");
-        extract = extract.replaceAll("ref(.*)/ref", "");
-        extract = extract.replaceAll("math(.*)/math", "");
+        String extract = article.replaceAll("!--(.*)--", ""); // remove html comments
+        extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
+        extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
 
 
         //remove all [[ ]] tags
+        //remove pictures
+        extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
+
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
+
         Matcher m = r.matcher(extract);
         while (m.find()) {
             String atext = m.group(2);
@@ -169,6 +173,8 @@ public class wikiTextParser {
                 //remove links
                 {"\\[([^\\[]*)\\]", ""},
 
+
+
                 //remove artifacts
                 // remove brackets and content in brackets
                 {"'''", "\""},
@@ -186,8 +192,11 @@ public class wikiTextParser {
                 {"\"\" ", ""},
                 {"\\[\\]", ""},
                 {"\\(\\)", ""},
-                {"&lt;(.*)&gt;", ""},
+                {"&lt;&gt;", ""},
                 {"__NOTOC__", ""},
+
+                // remove any more ref links
+                {"&lt;ref&gt;([^()]*)&lt;\\/ref&gt;", ""},
                 {"\n", ""},
         };
 
@@ -206,12 +215,6 @@ public class wikiTextParser {
     public String getDefinition(String article) {
         article = extractText(article);
 
-
-
-        //TODO: links werden abgeschnitten [http://www. in Rotaria (Titularbistum)
-        // Satzerkennung: Abschnitt generell erst nach 300 Zeichen,
-        // dann nach Punkt aber nicht wenn unmittelar vor Punkt nur
-        // ein Zeichen oder eine beliebige Zahl steht (z.B. "Er ist der 1. Mensch")
         String finalstr = "";
         String[] segs = article.split( Pattern.quote( "." ) );
         String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
@@ -220,12 +223,15 @@ public class wikiTextParser {
 
             // TODO: Catch IndexOutOfBounds Exception
             if (finalstr.length() >= 300) { // pruefe ob satzende
-                if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) {
+                if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) { // Segmente gross genug zum Untersuchen
                     // pruefe ob aktueller chunk neuer satz ist
                     if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
+                            // |z|.| B|.| in der|
+                            //  i-1  i    i+1
                             && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                             && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
                             && !segs[i-1].substring(segs[i-1].length()-2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
+                            && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
                             && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches(consonants+"*") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
                             && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("(^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
                             ) {
@@ -233,6 +239,8 @@ public class wikiTextParser {
                     } else { // noch kein satzende erreicht - weiter
                         finalstr += segs[i] + ".";
                     }
+                } else { // Segmente zu klein -> reinnehmen
+                    finalstr += segs[i] + ".";
                 }
             } else {
                 finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
