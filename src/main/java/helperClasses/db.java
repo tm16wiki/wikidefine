@@ -21,8 +21,7 @@ public class db {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:" + path);
             System.out.printf("connected!\n");
-
-            executeDBScript("./src/main/resources/definition.sql");
+            executeDBScript("./src/main/resources/definition.sqlite.sql");
         } catch (SQLException e) {
             System.out.printf("Error!\n");
         } catch (ClassNotFoundException e) {
@@ -39,6 +38,8 @@ public class db {
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
                 Class.forName("org.postgresql.Driver");
                 System.out.printf("connected!\n");
+                //setup table
+                executeDBScript("./src/main/resources/definition.postgresql.sql");
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
             } catch (ClassNotFoundException e) {
@@ -53,6 +54,8 @@ public class db {
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
                 Class.forName("com.mysql.jdbc.Driver\"");
                 System.out.printf("connected!\n");
+                //setup table
+                executeDBScript("./src/main/resources/definition.mysql.sql");
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
             } catch (ClassNotFoundException e) {
