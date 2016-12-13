@@ -73,7 +73,7 @@ public class db {
             if (rs != null) {
                 return rs;
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (!e.getLocalizedMessage().equals("does not return ResultSet")) {
                 return null;
             }

@@ -2,7 +2,6 @@ package wikiAPI;
 
 import helperClasses.xml;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -92,6 +91,7 @@ public class wikiFileDumpParser {
                             if (line.contains("#REDIRECT") ||
                                     line.contains("#WEITERLEITUNG") ||
                                     line.contains("<title>List") ||
+                                    line.contains("<title>Wikipedia:") ||
                                     line.contains("#redirect") ||
                                     line.contains("#Redirect")
                                     ) {
@@ -113,10 +113,14 @@ public class wikiFileDumpParser {
                             //TODO: postevaluate
                             if (evaluateDefinition(definition)) {
                                 if (verbose) {
-                                    System.out.println(title + " : " + definition);
+                                    System.out.println("+ " + title + " : " + definition);
                                 }
                                 if (db != null) {
                                     db.insertDefinition(title, definition);
+                                }
+                            } else {
+                                if (verbose) {
+                                    System.out.println("- " + title + " : " + definition);
                                 }
                             }
                         }

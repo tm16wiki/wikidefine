@@ -115,8 +115,6 @@ public class wikiTextParser {
             return null;
         }
         //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
-
-
         //remove all < > </ > tags
         String extract = article.replaceAll("!--(.*)--", "");
         extract = extract.replaceAll("ref(.*)/ref", "");
@@ -167,6 +165,8 @@ public class wikiTextParser {
         extract = extract.replaceAll("== (.*) ==", "");
         extract = extract.replaceAll("==", " ");
 
+        //remove links
+        extract = extract.replaceAll("\\[([^\\[]*)\\]", "");
 
         //remove artifacts
         // remove brackets and content in brackets
