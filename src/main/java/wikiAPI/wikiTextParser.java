@@ -4,8 +4,8 @@ package wikiAPI;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Map;
-import java.util.HashMap;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class wikiTextParser {
 
@@ -49,11 +49,9 @@ public class wikiTextParser {
                     article = article.substring(0, article.lastIndexOf("|"));
                     articles.add(article);
                     text = text.replace(m.group(), articletext);
-                    //System.out.println(article + " text: " + articletext);
                 } else {
                     articles.add(m.group(2));
                     text = text.replace(m.group(), m.group(2));
-                    //System.out.println(m.group(2) + " text: " + m.group(2));
                 }
             }
         }
@@ -122,11 +120,14 @@ public class wikiTextParser {
         String extract = article.replaceAll("!--(.*)--", ""); // remove html comments
         extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
         extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
+        Document extractedstr = Jsoup.parse(extract);
+        extract = extractedstr.text();
 
 
         //remove all [[ ]] tags
         //remove pictures
         extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
+        extract = extract.replaceAll("(\\[\\[Kategorie:)([^\\[\\[]*)(\\]\\])", "");
 
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
@@ -195,8 +196,6 @@ public class wikiTextParser {
                 {"&lt;&gt;", ""},
                 {"__NOTOC__", ""},
 
-                // remove any more ref links
-                {"&lt;ref&gt;([^()]*)&lt;\\/ref&gt;", ""},
                 {"\n", ""},
         };
 
@@ -226,8 +225,6 @@ public class wikiTextParser {
                 if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) { // Segmente gross genug zum Untersuchen
                     // pruefe ob aktueller chunk neuer satz ist
                     if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
-                            // |z|.| B|.| in der|
-                            //  i-1  i    i+1
                             && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                             && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
                             && !segs[i-1].substring(segs[i-1].length()-2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
@@ -246,7 +243,6 @@ public class wikiTextParser {
                 finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
             }
         }
-
         return finalstr;
     }
 }
