@@ -9,6 +9,178 @@ import org.jsoup.nodes.Document;
 
 public class wikiTextParser {
 
+    // replacements for german language - to be commented
+    static String[][] replacementsDE = {
+            //wikiclasses
+            //todo: z.B. Region Stuttgart, 1256
+            //bessere regex finden
+            {"\n\\|(?:.*)", ""},
+            {"\\{\\| class=(?:.*)", ""},
+
+            //remove headlines
+            {"== (.*) ==", ""},
+            {"==", " "},
+            //remove links
+            {"\\[([^\\[]*)\\]", ""},
+
+            //remove artifacts
+            // remove brackets and content in brackets
+            {"'''", "\""},
+            {"''", "\""},
+            {"\"\"", ""},
+            {"&nbsp;", " "},
+            {"nbsp;", " "},
+            {"&shy;", ""},
+            {"&amp;", ""},
+            {" ; ", ""},
+            {"�", ""},
+            {"<(.*)>", ""},
+            {"^\\[", ""},
+            {"\\s*\\([^)]*\\)", ""},
+            {"\"\" ", ""},
+            {"\\[\\]", ""},
+            {"\\(\\)", ""},
+            {"&lt;&gt;", ""},
+            {"__NOTOC__", ""},
+            {"\n", ""},
+    };
+
+    /**
+     * Called by FileDumpParser and webdefinition
+     * @param article Content of text-tag in XML
+     * @return clean compact definition string
+     */
+    public String getDefinition(String article) {
+
+        article = extractText(article); // remove additional info
+
+        article = cleanString(article, "de"); // remove and replace special characters not necessary for the definition
+
+        article = removeTags(article); // remove ref-tags
+        article = shortenDefinition(article); // trim length
+        article = removeWhiteSpaces(article);
+
+        return article;
+    }
+
+    /**
+     * Extract definition part by removing additional info but save this info
+     * @param article Content of text-tag in XML
+     * @return whole dirty definition string
+     */
+    private String extractText(String article) {
+        if(article==null){
+            return null;
+        }
+        //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
+        //remove all < > </ > tags
+        String extract = article.replaceAll("!--(.*)--", ""); // remove html comments
+        extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
+        extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
+        Document extractedstr = Jsoup.parse(extract);
+        extract = extractedstr.text();
+
+
+        //remove all [[ ]] tags
+        //remove pictures
+        extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
+        extract = extract.replaceAll("(\\[\\[Kategorie:)([^\\[\\[]*)(\\]\\])", "");
+        extract = extract.replaceAll("(\\[\\[bat-smg:)([^\\[\\[]*)(\\]\\])", "");
+        extract = extract.replaceAll("(\\[\\[eo:)([^\\[\\[]*)(\\]\\])", "");
+
+        //remove articles keep text
+        Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
+
+        Matcher m = r.matcher(extract);
+        while (m.find()) {
+            String atext = m.group(2);
+            String text;
+            //removes text link from article tag
+            if (atext.contains("|")) {
+                text = atext.substring(atext.indexOf("|") + 1, atext.length());
+                extract = extract.replace(m.group(), text);
+            } else {
+                extract = extract.replace(m.group(), m.group(2));
+            }
+        }
+        //remove files categories
+        extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
+                .replaceAll("&lt;!--(.*)--&gt;", "");
+
+
+        //remove all {{ }} tags
+        //remove wikipediaobjects
+        //4 level deep e.g. infoboxes
+        //todo: z.b. Talk (Mineral)
+        for (int i = 0; i < 5; i++) {
+            r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
+            m = r.matcher(extract);
+            while (m.find()) {
+                extract = extract.replace(m.group(), "");
+            }
+        }
+
+        return extract;
+    }
+
+    private static String cleanString(String str, String lang) {
+        if (lang.equals("de")) {
+            // use replacementsDE
+        }
+        for (int i = 0; i < replacementsDE.length; i++) {
+            // Todo: Pattern compile
+            str = str.replaceAll(replacementsDE[i][0], replacementsDE[i][1]);
+        }
+        return str;
+    }
+
+    private static String removeTags(String str) {
+        while (str.contains("<ref") && str.contains("</ref>")) {
+            System.out.println(str);
+            int start = str.indexOf("<ref");
+            int end = str.indexOf("</ref>");
+            str = str.replace(str.substring(start,end), "");
+        }
+        return str;
+    }
+
+    private static String shortenDefinition(String str) {
+        String finalstr = "";
+        String[] segs = str.split( Pattern.quote( "." ) );
+        String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
+
+        for (int i = 0; i < segs.length; i++) {
+
+            // TODO: Catch IndexOutOfBounds Exception
+            if (finalstr.length() >= 300) { // pruefe ob satzende
+                if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) { // Segmente gross genug zum Untersuchen
+                    // pruefe ob aktueller chunk neuer satz ist
+                    if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
+                            && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
+                            && !segs[i-1].substring(segs[i-1].length()-2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
+                            && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches(consonants+"*") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
+                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("(^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
+                            ) {
+                        break; // neuer satz soll nicht reingenommen werden
+                    } else { // noch kein satzende erreicht - weiter
+                        finalstr += segs[i] + ".";
+                    }
+                } else { // Segmente zu klein -> reinnehmen
+                    finalstr += segs[i] + ".";
+                }
+            } else {
+                finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
+            }
+        }
+        return finalstr;
+    }
+
+    private static String removeWhiteSpaces(String str) {
+        str = str.replaceAll("\\.(\\s|\\*)*\\.", ".");
+        return str.trim();
+    }
 
     public ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
@@ -110,139 +282,4 @@ public class wikiTextParser {
         return text.contains("{{Begriffsklärungshinweis}}");
     }
 
-
-    private String extractText(String article) {
-        if(article==null){
-            return null;
-        }
-        //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
-        //remove all < > </ > tags
-        String extract = article.replaceAll("!--(.*)--", ""); // remove html comments
-        extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
-        extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
-        Document extractedstr = Jsoup.parse(extract);
-        extract = extractedstr.text();
-
-
-        //remove all [[ ]] tags
-        //remove pictures
-        extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
-        extract = extract.replaceAll("(\\[\\[Kategorie:)([^\\[\\[]*)(\\]\\])", "");
-
-        //remove articles keep text
-        Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
-
-        Matcher m = r.matcher(extract);
-        while (m.find()) {
-            String atext = m.group(2);
-            String text;
-            //removes text link from article tag
-            if (atext.contains("|")) {
-                text = atext.substring(atext.indexOf("|") + 1, atext.length());
-                extract = extract.replace(m.group(), text);
-            } else {
-                extract = extract.replace(m.group(), m.group(2));
-            }
-        }
-        //remove files categories
-        extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
-                         .replaceAll("&lt;!--(.*)--&gt;", "");
-
-
-        //remove all {{ }} tags
-        //remove wikipediaobjects
-        //4 level deep e.g. infoboxes
-        //todo: z.b. Talk (Mineral)
-        for (int i = 0; i < 5; i++) {
-            r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
-            m = r.matcher(extract);
-            while (m.find()) {
-                extract = extract.replace(m.group(), "");
-            }
-        }
-
-        String[][] replacements = {
-                //wikiclasses
-                //todo: z.B. Region Stuttgart, 1256
-                //bessere regex finden
-                {"\n\\|(?:.*)", ""},
-                {"\\{\\| class=(?:.*)", ""},
-
-                //remove headlines
-                {"== (.*) ==", ""},
-                {"==", " "},
-                //remove links
-                {"\\[([^\\[]*)\\]", ""},
-
-
-
-                //remove artifacts
-                // remove brackets and content in brackets
-                {"'''", "\""},
-                {"''", "\""},
-                {"\"\"", ""},
-                {"&nbsp;", " "},
-                {"nbsp;", " "},
-                {"&shy;", ""},
-                {"&amp;", ""},
-                {" ; ", ""},
-                {"�", ""},
-                {"<(.*)>", ""},
-                {"^\\[", ""},
-                {"\\s*\\([^)]*\\)", ""},
-                {"\"\" ", ""},
-                {"\\[\\]", ""},
-                {"\\(\\)", ""},
-                {"&lt;&gt;", ""},
-                {"__NOTOC__", ""},
-
-                {"\n", ""},
-        };
-
-        return cleanString(extract, replacements).trim();
-    }
-
-    private static String cleanString(String str, String[][] replacements) {
-        for (int i = 0; i < replacements.length; i++) {
-            // Todo: Pattern compile
-            str = str.replaceAll(replacements[i][0], replacements[i][1]);
-        }
-        return str;
-    }
-
-
-    public String getDefinition(String article) {
-        article = extractText(article);
-
-        String finalstr = "";
-        String[] segs = article.split( Pattern.quote( "." ) );
-        String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
-
-        for (int i = 0; i < segs.length; i++) {
-
-            // TODO: Catch IndexOutOfBounds Exception
-            if (finalstr.length() >= 300) { // pruefe ob satzende
-                if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) { // Segmente gross genug zum Untersuchen
-                    // pruefe ob aktueller chunk neuer satz ist
-                    if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
-                            && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
-                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
-                            && !segs[i-1].substring(segs[i-1].length()-2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
-                            && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
-                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches(consonants+"*") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
-                            && !segs[i-1].substring(segs[i-1].lastIndexOf(" ")).matches("(^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
-                            ) {
-                        break; // neuer satz soll nicht reingenommen werden
-                    } else { // noch kein satzende erreicht - weiter
-                        finalstr += segs[i] + ".";
-                    }
-                } else { // Segmente zu klein -> reinnehmen
-                    finalstr += segs[i] + ".";
-                }
-            } else {
-                finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
-            }
-        }
-        return finalstr;
-    }
 }
