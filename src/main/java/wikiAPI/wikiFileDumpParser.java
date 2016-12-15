@@ -5,59 +5,74 @@ import helperClasses.xml;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 
 import static java.lang.StrictMath.round;
+import static java.lang.Thread.sleep;
 
 
 public class wikiFileDumpParser {
-    private boolean printstats = false;
-    private boolean verbose = false;
     private helperClasses.db db;
+    private int pages = 0,
+            prefiltered = 0,
+            definitions = 0,
+            errors = 0,
+            max,
+            threadcount;
+    private long chunksize,
+            startTime;
+    private boolean verbose = false;
+
 
     public wikiFileDumpParser(int threadnr, int maxpages, boolean printstats, boolean verbose, String path, helperClasses.db db) {
-        this.printstats = printstats;
-        this.verbose = verbose;
-        this.db = db;
         if (threadnr > Runtime.getRuntime().availableProcessors()) {
             threadnr = Runtime.getRuntime().availableProcessors();
         }
-        ArrayList<fileThread> threads = new ArrayList<>();
+        this.verbose = verbose;
+        this.db = db;
+        this.max = maxpages;
+        this.threadcount = threadnr;
         try {
+            this.startTime = System.currentTimeMillis();
+            this.chunksize = new RandomAccessFile(path, "r").getChannel().size() / threadnr;
+
+            fileThread thread = null;
             for (int i = 0; i < threadnr; i++) {
-                threads.add(new fileThread(new RandomAccessFile(path, "r"), i, threadnr, 0, (maxpages / threadnr)));
-            }
-            for (fileThread thread : threads) {
+                thread = new fileThread(new RandomAccessFile(path, "r"), i);
                 thread.start();
             }
-        } catch (FileNotFoundException e) {
+            synchronized (thread) {
+                try {
+                    thread.wait();
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (printstats) {
+                stats(startTime);
+            }
+        } catch (FileNotFoundException | NullPointerException e) {
             System.out.println("file not found!");
-        }catch (NullPointerException e){
-            System.out.println("file not found!");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    public void stats(long starttime) {
+        long time = System.currentTimeMillis() - starttime - 100;
+        System.out.println("finished after " + round(time / 1000.) + " s." +
+                "\n" + round((definitions / ((definitions + errors) * 1.) * 100.)) + "% ( +" + definitions + " / -" + errors + " )" +
+                " prefiltered: " + prefiltered);
     }
 
 
     private class fileThread extends Thread {
-        private int id,
-                max,
-                pages,
-                filtered = 0,
-                definitions = 0,
-                errors = 0;
-        private long chunksize;
+        private int id;
         private RandomAccessFile file;
 
-        fileThread(RandomAccessFile file, int threadid, int threadcount, int pages, int max) {
+        fileThread(RandomAccessFile file, int threadid) {
             this.id = threadid;
-            this.pages = pages;
-            this.max = max;
             this.file = file;
-            try {
-                this.chunksize = (file.getChannel().size() / threadcount);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -66,22 +81,20 @@ public class wikiFileDumpParser {
             wikiTextParser text = new wikiTextParser();
             String page = "",
                     line;
-            long start = 0,
-                    pos;
-            long startTime = System.currentTimeMillis();
 
             try {
                 //seek to chunkstart
                 file.seek(chunksize * (id));
+
+                long pos;
                 while (true) {
                     pos = file.getChannel().position();
                     if ((line = file.readLine()) == (null) || pos >= chunksize * (id + 1))
-                        break; //readline is faster;
+                        break;
                     //if (line.contains("<page id=")) { //for preprocessed pages
                     if (line.contains("<page>")) {
                         pages++;
-                        if (pages == 1) start = file.getChannel().position();
-                        if (pages - filtered > max) break;
+                        if (pages - prefiltered > max) break;
                         //own implementation...
                         line = readLineUTF();
                         boolean reject = false;
@@ -96,7 +109,7 @@ public class wikiFileDumpParser {
                                     line.contains("#Redirect")
                                     ) {
                                 page += "FILTERED</text>";
-                                filtered++;
+                                prefiltered++;
                                 reject = true;
                                 break;
                             }
@@ -128,9 +141,6 @@ public class wikiFileDumpParser {
                     }
                 }
                 file.close();
-                if (printstats) {
-                    printStats(System.currentTimeMillis() - startTime, start, pos);
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -157,7 +167,6 @@ public class wikiFileDumpParser {
             }
         }
 
-
         private boolean evaluateDefinition(String definition) {
             if (definition.length() < 50 || definition.length() > 3000) {
                 errors++;
@@ -168,12 +177,5 @@ public class wikiFileDumpParser {
             }
         }
 
-        private void printStats(long time, long start, long stop) {
-            System.out.println("\n==================   \tThread" + id + "   \t==================" +
-                    "\n Chunk: \t" + round((stop - start) / 1000000.) / 1000. + " GB\tfrom: " + start + ", to: " + stop + "" +
-                    "\n Time:  \t" + round(time / 1000.) + " s    \tmilis: " + time + "" +
-                    "\n Pages: \t" + (definitions + errors) + "    \t\tfound: " + pages + ", filtered: " + filtered + "" +
-                    "\n DefGen:\t" + round((definitions / ((definitions + errors) * 1.) * 100.)) + "%    \t\t+ " + definitions + "/ - " + errors + "");
-        }
     }
 }
