@@ -124,13 +124,7 @@ public class configCLI {
                 System.out.print("databasepassword: ");
                 dbpassword = scan.nextLine();
             }
-            localdb.execQuery("insert into config(name, language, file, exportdb, dbuser, dbpassword) values('" +
-                    name + "' , '" +
-                    lang + "', '" +
-                    filepath + "', '" +
-                    dbpath + "', '" +
-                    dbuser + "', '" +
-                    dbpassword + "');");
+            localdb.insertConfiguration(name, lang, filepath, dbpath, dbuser, dbpassword);
         } catch (Exception e) {
             System.out.println("can't create config");
             e.printStackTrace();

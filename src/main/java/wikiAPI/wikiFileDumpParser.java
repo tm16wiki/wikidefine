@@ -4,6 +4,8 @@ import helperClasses.xml;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Objects;
+
 import static java.lang.StrictMath.round;
 import static java.lang.Thread.sleep;
 
@@ -12,14 +14,12 @@ import static java.lang.Thread.sleep;
  */
 public class wikiFileDumpParser {
     private helperClasses.db db;
-    private int pages = 0,
-            prefiltered = 0,
-            definitions = 0,
-            errors = 0,
-            max,
-            threadcount;
-    private long chunksize,
-            startTime;
+    private int pages = 0;
+    private int prefiltered = 0;
+    private int definitions = 0;
+    private int errors = 0;
+    private int max;
+    private long chunksize;
     private boolean verbose = false;
 
     /**
@@ -38,9 +38,8 @@ public class wikiFileDumpParser {
         this.verbose = verbose;
         this.db = db;
         this.max = maximum;
-        this.threadcount = threads;
         try {
-            this.startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             this.chunksize = new RandomAccessFile(path, "r").getChannel().size() / threads;
 
             fileThread thread = null;
@@ -49,7 +48,7 @@ public class wikiFileDumpParser {
                 thread.start();
             }
             //synchronize over last thread
-            synchronized (thread) {
+            synchronized (Objects.requireNonNull(thread)) {
                 try {
                     //wait for last thread to finish
                     thread.wait();
@@ -73,7 +72,7 @@ public class wikiFileDumpParser {
      * prints results and time needed
      * @param starttime starttime
      */
-    public void stats(long starttime) {
+    private void stats(long starttime) {
         //calculate time needed
         long time = System.currentTimeMillis() - starttime - 100;
         //print information
@@ -118,10 +117,7 @@ public class wikiFileDumpParser {
                         pages++;
                         line = readLineUTF();
                         boolean reject = false;
-                        while (!line.contains("</page>") ) { //&
-                            if(line == null){
-                                break;
-                            }
+                        while (!Objects.requireNonNull(line).contains("</page>") ) {
                             //TODO: prefilter for lists or redirects
                             if (line.contains("#REDIRECT") ||
                                     line.contains("#WEITERLEITUNG") ||

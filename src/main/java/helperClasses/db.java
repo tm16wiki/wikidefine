@@ -92,11 +92,17 @@ public class db {
         }
     }
 
-    public boolean insertConfiguration(String title, String definition) {
+    public boolean insertConfiguration(String name, String lang, String filepath, String dbpath, String dbuser, String dbpassword) {
         try {
             Statement stmt = c.createStatement();
             //stmt.executeQuery("create table if not exists definitions( title");
-            stmt.executeQuery("insert into definition values('" + title + "', '" + definition + "');");
+            stmt.executeQuery("insert into config(name, language, file, exportdb, dbuser, dbpassword) values('" +
+                    name + "' , '" +
+                    lang + "', '" +
+                    filepath + "', '" +
+                    dbpath + "', '" +
+                    dbuser + "', '" +
+                    dbpassword + "');");
             return true;
         } catch (SQLException e) {
             //e.printStackTrace();
