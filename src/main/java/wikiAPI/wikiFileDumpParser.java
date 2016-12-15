@@ -168,7 +168,7 @@ public class wikiFileDumpParser {
         }
 
         private boolean evaluateDefinition(String definition) {
-            if (definition.length() < 50 || definition.length() > 3000) {
+            if (definition.length() < 30 || definition.length() > 3000) {
                 errors++;
                 return false;
             } else {
