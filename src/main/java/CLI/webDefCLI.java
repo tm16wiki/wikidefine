@@ -21,8 +21,6 @@ public class webDefCLI implements ShellDependent {
         this.config = config;
         System.out.println("====    CONFIG    ====");
         System.out.println("language is set to: " + config.getLang());
-
-        System.out.println();
     }
 
 

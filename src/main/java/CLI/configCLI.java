@@ -23,7 +23,7 @@ public class configCLI {
     }
 
     public static void main(String[] args) {
-        shell = ShellFactory.createConsoleShell("wikiDefine", "", new configCLI());
+        shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new configCLI());
         try {
             System.out.println("\n====   CONFIGURATIONS   ====");
             shell.processLine("ls");
@@ -31,9 +31,6 @@ public class configCLI {
                 System.out.println("\ncreating new configuration. please name it default.");
                 shell.processLine("nc");
             }
-            System.out.println();
-            System.out.println("\n====   COMMANDS   ====");
-            shell.processLine("?l");
             shell.commandLoop();
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,10 +43,8 @@ public class configCLI {
     public void webdef() {
         try {
             Shell webcli = ShellFactory.createSubshell("webdef", shell, "", new webDefCLI(this.config));
-            System.out.println("\n====   COMMANDS   ====");
-            webcli.processLine("?l");
             webcli.commandLoop();
-        } catch (CLIException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -59,11 +54,9 @@ public class configCLI {
             description = "creates all definitions out of file with max speed")
     public void filedump() {
         try {
-            Shell filecli = ShellFactory.createSubshell("filedump", shell, "", new fileDumpCLI(this.config));
-            System.out.println("\n====   COMMANDS   ====");
-            filecli.processLine("?l");
+            Shell filecli = ShellFactory.createSubshell(config.getFilepath(), shell, "", new fileDumpCLI(this.config));
             filecli.commandLoop();
-        } catch (CLIException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

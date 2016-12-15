@@ -40,7 +40,6 @@ public class fileDumpCLI implements ShellDependent {
         System.out.println("db export:\t" + export);
         System.out.println("verbose:\t" + verbose);
         System.out.println("show stats:\t" + stats);
-        System.out.println();
     }
 
     @Command(name = "run",
@@ -53,14 +52,6 @@ public class fileDumpCLI implements ShellDependent {
             new wikiFileDumpParser(threads, max, stats, verbose, filepath, exportDB);
         }
     }
-
-    @Command(name = "runfast",
-            abbrev = "rf",
-            description = "creates all definitions out of file with max speed")
-    public void fastrun() {
-        new wikiFileDumpParser(Integer.MAX_VALUE, Integer.MAX_VALUE, stats, verbose, filepath, null);
-    }
-
 
 
     public void cliSetShell(Shell theShell) {
