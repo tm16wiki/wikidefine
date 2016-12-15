@@ -34,7 +34,7 @@ public class wikiTextParser {
             {"&amp;", ""},
             {" ; ", ""},
             {"�", ""},
-            {"<(.*)>", ""},
+            //{"<(.*)>", ""}, // BAD - demo: Adzukibohne
             {"^\\[", ""},
             {"\\s*\\([^)]*\\)", ""},
             {"\"\" ", ""},
@@ -104,7 +104,7 @@ public class wikiTextParser {
             }
         }
         //remove files categories
-        extract = extract.replaceAll("(\\[\\[)(\\w)*:(.*)(\\]\\])", "")
+        extract = extract.replaceAll("(\\[\\[)(\\w)*:([^\\]]*)(\\]\\])", "")
                 .replaceAll("&lt;!--(.*)--&gt;", "");
 
 
@@ -135,12 +135,23 @@ public class wikiTextParser {
     }
 
     private static String removeTags(String str) {
-        while (str.contains("<ref") && str.contains("</ref>")) {
+        /*while (str.contains("<ref") && str.contains("</ref>")) {
             System.out.println(str);
             int start = str.indexOf("<ref");
             int end = str.indexOf("</ref>");
             str = str.replace(str.substring(start,end), "");
         }
+        while (str.contains("<ref") && str.contains("/>")) {
+            System.out.println(str);
+            int start = str.indexOf("<ref");
+            int end = str.indexOf("/>");
+            str = str.replace(str.substring(start,end), "");
+        }*/
+        str = str.replaceAll("^\\W*", ""); // replace all non-word chars at beginning of string
+        /*if (str.contains("<>")) {
+            str = str.replace("<>", "");
+        }*/
+        str = str.replaceAll("(<)([^\\/]*)(\\/>)", ""); // replace all <ref />-tags
         return str;
     }
 
@@ -152,7 +163,7 @@ public class wikiTextParser {
         for (int i = 0; i < segs.length; i++) {
 
             // TODO: Catch IndexOutOfBounds Exception
-            if (finalstr.length() >= 300) { // pruefe ob satzende
+            if (finalstr.length() >= 200) { // pruefe ob satzende
                 if (i < segs.length && i > 0 && segs[i-1].length() > 5 && segs[i].length() > 2 && segs[i-1].contains(" ")) { // Segmente gross genug zum Untersuchen
                     // pruefe ob aktueller chunk neuer satz ist
                     if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
@@ -238,10 +249,10 @@ public class wikiTextParser {
         Matcher m = r.matcher(text);
         while (m.find()) {
             categories.add( m.group()
-                            .replace("[[", "")
-                            .replace("]]", "")
-                            .replace("Kategorie:", "")
-                            .replace("|", "")
+                    .replace("[[", "")
+                    .replace("]]", "")
+                    .replace("Kategorie:", "")
+                    .replace("|", "")
             );
         }
         return categories;
