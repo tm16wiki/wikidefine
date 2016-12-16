@@ -11,12 +11,6 @@ public class wikiTextParser {
 
     // replacements for german language - to be commented
     static String[][] replacementsDE = {
-            //wikiclasses
-            //todo: z.B. Region Stuttgart, 1256
-            //bessere regex finden
-            {"\n\\|(?:.*)", ""},
-            {"\\{\\| class=(?:.*)", ""},
-
             //remove headlines
             {"== (.*) ==", ""},
             {"==", " "},
@@ -64,7 +58,7 @@ public class wikiTextParser {
     }
 
     /**
-     * Extract definition part by removing additional info but save this info
+     * Extract definition part by removing additional info
      * @param article Content of text-tag in XML
      * @return whole dirty definition string
      */
@@ -74,19 +68,38 @@ public class wikiTextParser {
         }
         //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
         //remove all < > </ > tags
-        String extract = article.replaceAll("!--(.*)--", ""); // remove html comments
+        //String extract = article;
+
+        String[] extracts = article.split("\\r\\n|\\n|\\r");
+        ArrayList<String> resExtract = new ArrayList<String>();
+
+        for (String i : extracts ) {
+            if (i.length() > 0) {
+                if (!i.substring(0, 1).matches("[^a-zA-Z0-9']")) { // word beginning
+                    resExtract.add(i);
+                }
+            }
+        }
+        String extract = "";
+        for (String j : resExtract) {
+                extract += j;
+        }
+        extract = extract.replaceAll("!\n", ""); // remove html comment
+        extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
+        extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
         extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
         extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
-        Document extractedstr = Jsoup.parse(extract);
-        extract = extractedstr.text();
-
 
         //remove all [[ ]] tags
         //remove pictures
         extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
+        extract = extract.replaceAll("(\\[\\[File:)([^\\[\\[]*)(\\]\\])", "");
         extract = extract.replaceAll("(\\[\\[Kategorie:)([^\\[\\[]*)(\\]\\])", "");
         extract = extract.replaceAll("(\\[\\[bat-smg:)([^\\[\\[]*)(\\]\\])", "");
         extract = extract.replaceAll("(\\[\\[eo:)([^\\[\\[]*)(\\]\\])", "");
+
+        Document extractedstr = Jsoup.parse(extract); // remove any more html tags with Jsoup
+        extract = extractedstr.text();
 
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
@@ -135,22 +148,7 @@ public class wikiTextParser {
     }
 
     private static String removeTags(String str) {
-        /*while (str.contains("<ref") && str.contains("</ref>")) {
-            System.out.println(str);
-            int start = str.indexOf("<ref");
-            int end = str.indexOf("</ref>");
-            str = str.replace(str.substring(start,end), "");
-        }
-        while (str.contains("<ref") && str.contains("/>")) {
-            System.out.println(str);
-            int start = str.indexOf("<ref");
-            int end = str.indexOf("/>");
-            str = str.replace(str.substring(start,end), "");
-        }*/
         str = str.replaceAll("^\\W*", ""); // replace all non-word chars at beginning of string
-        /*if (str.contains("<>")) {
-            str = str.replace("<>", "");
-        }*/
         str = str.replaceAll("(<)([^\\/]*)(\\/>)", ""); // replace all <ref />-tags
         return str;
     }
