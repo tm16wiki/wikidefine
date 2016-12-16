@@ -75,19 +75,35 @@ public class wikiTextParser {
 
         for (String i : extracts ) {
             if (i.length() > 0) {
-                if (!i.substring(0, 1).matches("[^a-zA-Z0-9']")) { // word beginning
+                if (!i.substring(0, 1).matches("[^a-zA-Z0-9'\\*]")) { // word beginning
                     resExtract.add(i);
                 }
             }
         }
         String extract = "";
         for (String j : resExtract) {
-                extract += j;
+                extract += " " + j;
         }
-        extract = extract.replaceAll("!\n", ""); // remove html comment
+
+
+        /*if (extract.contains("ref")) {
+            System.out.println("ref found");
+            String res = "";
+            String[] norefs = extract.split("&lt;ref[^&lt;]*&lt;");
+            for (String k : norefs) {
+                if (k.contains("&lt;/ref&gt;")) {
+                    res += " " + k.substring(k.indexOf("&lt;/ref&gt;")+1);
+                } else {
+                    res += " " + k;
+                }
+            }
+            extract = res;
+        }*/
+
+        extract = extract.replaceAll("\n", ""); // remove html comment
         extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
         extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
-        extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
+        //extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
         extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
 
         //remove all [[ ]] tags
@@ -98,8 +114,7 @@ public class wikiTextParser {
         extract = extract.replaceAll("(\\[\\[bat-smg:)([^\\[\\[]*)(\\]\\])", "");
         extract = extract.replaceAll("(\\[\\[eo:)([^\\[\\[]*)(\\]\\])", "");
 
-        Document extractedstr = Jsoup.parse(extract); // remove any more html tags with Jsoup
-        extract = extractedstr.text();
+        extract = Jsoup.parse(extract).text();
 
         //remove articles keep text
         Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
