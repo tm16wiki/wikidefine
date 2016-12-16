@@ -199,7 +199,7 @@ public class wikiFileDumpParser {
          * @return returns true if the definition is valid and false if it isn't
          */
         private boolean evaluateDefinition(String definition) {
-            if (definition.length() < 30 || definition.length() > 3000) {
+            if (definition.length() < 30 || definition.length() > 1000) {
                 errors++;
                 return false;
             } else {
