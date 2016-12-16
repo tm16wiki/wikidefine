@@ -8,27 +8,42 @@ import helperClasses.https;
 import helperClasses.xml;
 import wikiAPI.wikiTextParser;
 
+/**
+ * cli for debuging by testing helperclasses and wikiAPI by getting definitions oder article info from the web
+ */
 public class webDefCLI implements ShellDependent {
     private static config config;
     private Shell theShell;
-
     private wikiTextParser text = new wikiTextParser();
     private helperClasses.xml xml = new xml();
     private helperClasses.https https = new https();
 
 
+    /**
+     * constructor for the cli
+     *
+     * @param config configuration to load
+     */
     webDefCLI(config config) {
-        this.config = config;
+        webDefCLI.config = config;
         System.out.println("====    CONFIG    ====");
-        System.out.println("language is set to: " + config.getLang());
+        System.out.println("language is set to: " + CLI.config.getLang());
     }
 
 
+    /**
+     * setter for the shell
+     * @param theShell shell to set
+     */
     public void cliSetShell(Shell theShell) {
         this.theShell = theShell;
     }
 
 
+    /**
+     * prints all definition of a term by mining a wikipedia article from web
+     * @param term name of the article
+     */
     @Command(name = "define",
             abbrev = "d",
             description = "creates definitions out of web")
@@ -36,7 +51,7 @@ public class webDefCLI implements ShellDependent {
         term = term.replaceAll(" ", "_");
 
         String url;
-        switch (config.getLang()) {
+        switch (CLI.config.getLang()) {
             case "de":
                 url = "https://de.wikipedia.org/wiki/Spezial:Exportieren/";
                 break;
@@ -54,13 +69,17 @@ public class webDefCLI implements ShellDependent {
         System.out.println(text.getDefinition(content));
     }
 
+    /**
+     * prints all infos about a wikipedia article from web
+     * @param term name of the article
+     */
     @Command(name = "info",
             abbrev = "i",
             description = "prints webdump info of the article")
     public void webinfo(@Param(name = "article", description = "get info about this article") String term) {
         term = term.replaceAll(" ", "_");
         String url;
-        switch (config.getLang()) {
+        switch (CLI.config.getLang()) {
             case "de":
                 url = "https://de.wikipedia.org/wiki/Spezial:Exportieren/";
                 break;
@@ -98,11 +117,15 @@ public class webDefCLI implements ShellDependent {
         //System.out.println("cleaned content:\t" + text.extractText(content));
     }
 
+    /**
+     * setter method for language
+     * @param lang language to set
+     */
     @Command(name = "setlanguage",
             abbrev = "sl",
             description = "sets language")
     public void setLang(@Param(name = "language", description = "new lang value") String lang) {
-        this.config.setLang( lang);
+        CLI.config.setLang( lang);
     }
 
 }
