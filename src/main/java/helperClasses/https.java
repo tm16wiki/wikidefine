@@ -9,6 +9,10 @@ import java.net.URL;
 import java.security.cert.Certificate;
 import java.util.Date;
 
+
+/**
+ * helperclass to manage https connections
+ */
 public class https {
 
     private String content;
@@ -18,10 +22,12 @@ public class https {
     private Date timestamp;
 
 
-    public https() {
-
-    }
-
+    /**
+     * creates connection to given url
+     *
+     * @param https_url url to connect
+     * @return true if successful or false if not
+     */
     public boolean loadURL(String https_url) {
         this.URL = https_url;
         this.timestamp = new Date();
@@ -44,6 +50,10 @@ public class https {
     }
 
 
+    /**
+     * loads certificates from given connetion
+     * @param con connection to load from
+     */
     private void loadCertInfo(HttpsURLConnection con) throws IOException {
         if (con != null) {
             certInfo += "Response Code : " + con.getResponseCode();
@@ -61,6 +71,10 @@ public class https {
         }
     }
 
+    /**
+     * loads content from given https connection
+     * @param con httpsURLConnection
+     */
     private void loadContent(HttpsURLConnection con) throws IOException {
         String lines = "";
         if (con != null) {
@@ -76,22 +90,42 @@ public class https {
         content = new String(lines.getBytes(), "UTF-8");
     }
 
+    /**
+     * getter method for the content
+     * @return returns contentstring
+     */
     public String getContent() {
         return content;
     }
 
+    /**
+     * getter method for the certificate information
+     * @return returns certificatestring
+     */
     public String getCertInfo() {
         return certInfo;
     }
 
+    /**
+     * getter method for the url
+     * @return returns url
+     */
     public String getURL() {
         return URL;
     }
 
+    /**
+     * getter method for the timestamp
+     * @return returns timestamp
+     */
     public Date getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * getter method for the https certificates
+     * @return array of certificates
+     */
     public Certificate[] getCertificates() {
         return certificates;
     }

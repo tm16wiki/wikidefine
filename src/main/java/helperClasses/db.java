@@ -4,20 +4,26 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.*;
 
-
+/**
+ * class to manage db connection independent of the type of the db
+ */
 public class db {
     private Connection c;
     private String path;
 
-    //sqlite
+    /**
+     * constructor for sqlite
+     *
+     * @param db path to sqlite db
+     */
     public db(String db) {
         path = db;
-        if(db.contains("null")){
+        if (db.contains("null")) {
             System.out.println("filepath is set to null");
             return;
         }
         try {
-            System.out.print("connecting to "+ path +" ... ");
+            System.out.print("connecting to " + path + " ... ");
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:" + path);
             System.out.printf("connected!\n");
@@ -29,6 +35,13 @@ public class db {
         }
     }
 
+    /**
+     * constructor for postgresql and mysql
+     *
+     * @param db   path to db
+     * @param user username for db
+     * @param pass password for db
+     */
     public db(String db, String user, String pass) {
         path = db;
         //PostgreSQL
@@ -49,7 +62,7 @@ public class db {
         //MySQL
         if (path.contains("mysql://")) {
             try {
-                System.out.print("connecting to MySQLDB "+ path +" " + user +" " + pass+" " +
+                System.out.print("connecting to MySQLDB " + path + " " + user + " " + pass + " " +
                         "... ");
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
                 Class.forName("com.mysql.jdbc.Driver\"");
@@ -64,6 +77,12 @@ public class db {
         }
     }
 
+    /**
+     * runs query on db returns resultset
+     *
+     * @param query querystring to execute
+     * @return returns result of the query as resultset
+     */
     public ResultSet execQuery(String query) {
         Statement stmt;
         try {
@@ -84,14 +103,29 @@ public class db {
         return null;
     }
 
+
+    /**
+     * inserts definition into db
+     *
+     * @param title      of the article
+     * @param definition generated definition
+     * @return returns boolean
+     */
     public boolean insertDefinition(String title, String definition) {
-        if( execQuery("insert into definition(title, text) values('" + title + "', '" + definition + "');") != null){
-            return true;
-        }else {
-            return false;
-        }
+        return execQuery("insert into definition(title, text) values('" + title + "', '" + definition + "');") != null;
     }
 
+    /**
+     * inserts configuration into db
+     *
+     * @param name       name of the configuration
+     * @param lang       language
+     * @param filepath   path of the file to process
+     * @param dbpath     location of the export db
+     * @param dbuser     db user
+     * @param dbpassword db password
+     * @return returns boolean
+     */
     public boolean insertConfiguration(String name, String lang, String filepath, String dbpath, String dbuser, String dbpassword) {
         try {
             Statement stmt = c.createStatement();
@@ -110,7 +144,13 @@ public class db {
         }
     }
 
-    public boolean executeDBScript(String filepath) {
+    /**
+     * runs sql script
+     *
+     * @param filepath location of the sql script
+     * @return returns boolean
+     */
+    private boolean executeDBScript(String filepath) {
         boolean isScriptExecuted = false;
         try {
             Statement stmt = c.createStatement();
