@@ -1,58 +1,14 @@
 package wikiAPI;
 
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class wikiTextParser {
 
-    // replacements for german language - to be commented
-    static String[][] replacementsDE = {
-            //remove headlines
-            {"== (.*) ==", ""},
-            {"==", " "},
-            //remove links
-            {"\\[([^\\[]*)\\]", ""},
+public class newTextParser {
 
-            //remove artifacts
-            // remove brackets and content in brackets
-            {"'''", "\""},
-            {"''", "\""},
-            {"\"\"", ""},
-            {"&nbsp;", " "},
-            {"nbsp;", " "},
-            {"&shy;", ""},
-            {"&amp;", ""},
-            {" ; ", ""},
-            {"�", ""},
-            //{"<(.*)>", ""}, // BAD - demo: Adzukibohne
-            {"^\\[", ""},
-            {"\\s*\\([^)]*\\)", ""},
-            {"\"\" ", ""},
-            {"\\[\\]", ""},
-            {"\\(\\)", ""},
-            {"&lt;&gt;", ""},
-            {"__NOTOC__", ""},
-            {"\n", ""},
-    };
-
-    private static String cleanString(String str, String lang) {
-        if (lang.equals("de")) {
-            // use replacementsDE
-        }
-        for (int i = 0; i < replacementsDE.length; i++) {
-            // Todo: Pattern compile
-            str = str.replaceAll(replacementsDE[i][0], replacementsDE[i][1]);
-        }
-        return str;
-    }
-
-    private static String removeTags(String str) {
-        str = str.replaceAll("^\\W*", ""); // replace all non-word chars at beginning of string
-        str = str.replaceAll("(<)([^\\/]*)(\\/>)", ""); // replace all <ref />-tags
-        return str;
-    }
 
     private static String shortenDefinition(String str) {
         String finalstr = "";
@@ -60,7 +16,6 @@ public class wikiTextParser {
         String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
 
         for (int i = 0; i < segs.length; i++) {
-
             // TODO: Catch IndexOutOfBounds Exception
             if (finalstr.length() >= 200) { // pruefe ob satzende
                 if (i < segs.length && i > 0 && segs[i - 1].length() > 5 && segs[i].length() > 2 && segs[i - 1].contains(" ")) { // Segmente gross genug zum Untersuchen
@@ -87,116 +42,127 @@ public class wikiTextParser {
         return finalstr;
     }
 
-    private static String removeWhiteSpaces(String str) {
-        str = str.replaceAll("\\.(\\s|\\*)*\\.", ".");
-        return str.trim();
+    /**
+     * unescapes html and wikipedia escapes in article
+     *
+     * @param text article text to unescape
+     * @return cleaned text as string
+     */
+    public String unescapeArticle(String text) {
+        String[] replacements;
+        String[] escapes;
+        escapes = new String[]{
+                //html escape sequences
+                "&quot;", "&apos;", "&amp;", "&lt;", "&gt;", "&nbsp;", /*"&iexcl;", "&cent;", "&pound;", "&curren;",
+                "&yen;", "&brvbar;", "&sect;", "&uml;", "&copy;", "&ordf;", "&laquo;", "&not;", "&shy;", "&reg;",
+                "&macr;", "&deg;", "&plusmn;", "&sup2;", "&sup3;", "&acute;", "&micro;", "&para;", "&middot;", "&cedil;",
+                "&sup1;", "&ordm;", "&raquo;", "&frac14;", "&frac12;", "&frac34;", "&iquest;", "&times;", "&divide;",
+                "&Agrave;", "&Aacute;", "&Acirc;", "&Atilde;", "&Auml;", "&Aring;", "&AElig;", "&Ccedil;", "&Egrave;",
+                "&Eacute;", "&Ecirc;", "&Euml;", "&Igrave;", "&Iacute;", "&Icirc;", "&Iuml;", "&ETH;", "&Ntilde;",
+                "&Ograve;", "&Oacute;", "&Ocirc;", "&Otilde;", "&Ouml;", "&Oslash;", "&Ugrave;", "&Uacute;", "&Ucirc;",
+                "&Uuml;", "&Yacute;", "&THORN;", "&szlig;", "&agrave;", "&aacute;", "&acirc;", "&atilde;", "&auml;",
+                "&aring;", "&aelig;", "&ccedil;", "&egrave;", "&eacute;", "&ecirc;", "&euml;", "&igrave;", "&iacute;",
+                "&icirc;", "&iuml;", "&eth;", "&ntilde;", "&ograve;", "&oacute;", "&ocirc;", "&otilde;", "&ouml;",
+                "&oslash;", "&ugrave;", "&uacute;", "&ucirc;", "&uuml;", "&yacute;", "&thorn;", "&yuml;"
+                */
+                //wikipedia escape sequences
+                "'''", "''",
+        };
+        replacements = new String[]{
+                //html escape sequence replacements
+                "\"", "'", "&", "<", ">", " ", /*"¡", "¢", "£", "¤", "¥", "¦", "§", "¨", "©", "ª", "«", "¬", " ", "®",
+                "¯", "°", "±", "²", "³", "´", "µ", "¶", "·", "¸", "¹", "º", "»", "¼", "½", "¾", "¿", "×", "÷", "À", "Á",
+                "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö",
+                "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ", "ß", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì",
+                "í", "î", "ï", "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "þ", "ÿ"
+                */
+                //wikipedia escapesequence replacements
+                "\"", "\"",
+        };
+        return StringUtils.replaceEachRepeatedly(text, escapes, replacements);
     }
 
     /**
      * Called by FileDumpParser and webdefinition
+     *
      * @param article Content of text-tag in XML
      * @return clean compact definition string
      */
     public String getDefinition(String article) {
         long starttime = System.currentTimeMillis();
 
-        article = extractText(article); // remove additional info
-        article = cleanString(article, "de"); // remove and replace special characters not necessary for the definition
-        article = removeTags(article); // remove ref-tags
-        article = shortenDefinition(article); // trim length
-        article = removeWhiteSpaces(article);
+        //TODO good preprocessed ( in filedumpparser? ) shortage of the article
+        for (String s : article.split("\n")) {
+            if (s.length() < 2) {
+            } else {
+                article += s;
+            }
+        }
+        article = unescapeArticle(article);
+        article = extractText(article);
+        article = shortenDefinition(article);
+        article = StringUtils.replace(article, "\n", "");
 
         return (System.currentTimeMillis() - starttime) + " " + article;
     }
 
     /**
      * Extract definition part by removing additional info
+     *
      * @param article Content of text-tag in XML
      * @return whole dirty definition string
      */
     private String extractText(String article) {
-        if(article==null){
-            return null;
-        }
-        //TODO: Listen (z.b. Apollo, Tenor (Begriffsklärung), DPA, GBI)
-        //remove all < > </ > tags
-        //String extract = article;
+        String extract = new String();
+        Pattern r;
+        Matcher m;
 
-        String[] extracts = article.split("\\r\\n|\\n|\\r");
-        ArrayList<String> resExtract = new ArrayList<String>();
-
-        for (String i : extracts ) {
-            if (i.length() > 0) {
-                if (!i.substring(0, 1).matches("[^a-zA-Z0-9'\\*]")) { // word beginning
-                    resExtract.add(i);
-                }
-            }
-        }
-        String extract = "";
-        for (String j : resExtract) {
-                extract += " " + j;
-        }
-
-
-        /*if (extract.contains("ref")) {
-            System.out.println("ref found");
-            String res = "";
-            String[] norefs = extract.split("&lt;ref[^&lt;]*&lt;");
-            for (String k : norefs) {
-                if (k.contains("&lt;/ref&gt;")) {
-                    res += " " + k.substring(k.indexOf("&lt;/ref&gt;")+1);
-                } else {
-                    res += " " + k;
-                }
-            }
-            extract = res;
-        }*/
-
-        extract = extract.replaceAll("\n", ""); // remove html comment
-        extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
-        extract = extract.replaceAll("!--(.*)--", ""); // remove html comments
-        //extract = extract.replaceAll("(&lt;ref&gt;)([^&]*)(&lt;\\/ref&gt;)", ""); // remove ref tags
-        extract = extract.replaceAll("math(.*)/math", ""); // remove mathematical tags
+        //remove all < > notated tags
+        extract = StringUtils.replaceAll(article, "<!--([^<]*)-->", "");
+        extract = StringUtils.replaceAll(extract, "<(\\w*)>([^<]*)<\\/(\\w*)>", "");
+        extract = StringUtils.replaceAll(extract, "<ref ([^<]*) \\/>", "");
+        extract = StringUtils.replace(extract, "<br />", "");
+        extract = StringUtils.replace(extract, "<nowiki />", "");
+        extract = StringUtils.replace(extract, "<references />", "");
 
         //remove all [[ ]] tags
-        //remove pictures
-        extract = extract.replaceAll("(\\[\\[Datei:)([^\\[\\[]*)(\\]\\])", "");
-        extract = extract.replaceAll("(\\[\\[File:)([^\\[\\[]*)(\\]\\])", "");
-        extract = extract.replaceAll("(\\[\\[Kategorie:)([^\\[\\[]*)(\\]\\])", "");
-        extract = extract.replaceAll("(\\[\\[bat-smg:)([^\\[\\[]*)(\\]\\])", "");
-        extract = extract.replaceAll("(\\[\\[eo:)([^\\[\\[]*)(\\]\\])", "");
-
         //remove articles keep text
-        Pattern r = Pattern.compile("(\\[\\[)([^\\[\\]]*)(\\]\\])");
-
-        Matcher m = r.matcher(extract);
+        r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
+        m = r.matcher(extract);
         while (m.find()) {
             String atext = m.group(2);
             String text;
             //removes text link from article tag
             if (atext.contains("|")) {
                 text = atext.substring(atext.indexOf("|") + 1, atext.length());
-                extract = extract.replace(m.group(), text);
+                extract = StringUtils.replace(extract, m.group(), text);
             } else {
-                extract = extract.replace(m.group(), m.group(2));
+                extract = StringUtils.replace(extract, m.group(), m.group(2));
             }
         }
-        //remove files categories
-        extract = extract.replaceAll("(\\[\\[)(\\w)*:([^\\]]*)(\\]\\])", "")
-                .replaceAll("&lt;!--(.*)--&gt;", "");
-
+        //remove files, picture, categories and other
+        extract = StringUtils.replaceAll(extract, "(\\[\\[)(\\w)*:(.*)(\\]\\])", "");
 
         //remove all {{ }} tags
         //remove wikipediaobjects
         //4 level deep e.g. infoboxes
         //todo: z.b. Talk (Mineral)
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
             m = r.matcher(extract);
             while (m.find()) {
                 extract = extract.replace(m.group(), "");
             }
         }
+
+        //wikiclasses
+        extract = StringUtils.replaceAll(extract, "\\{\\| class([^{]*)\\|\\}", "");
+
+        //exclude links
+        extract = StringUtils.replaceAll(extract, "\\[htttp(.*)\\]", "");
+
+        //remove headlines
+        extract = StringUtils.replaceAll(extract, "== (.*) ==", "");
 
         return extract;
     }
@@ -230,13 +196,13 @@ public class wikiTextParser {
         String pattern = "(\\[\\[)([^:\\[\\]]*)(\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
-        for(int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             while (m.find()) {
                 String article = m.group(2);
                 String articletext;
                 //removes text link from article tag
                 if (article.contains("|")) {
-                    articletext = article.substring(article.indexOf("|")+1, article.length());
+                    articletext = article.substring(article.indexOf("|") + 1, article.length());
                     article = article.substring(0, article.lastIndexOf("|"));
                     articles.add(article);
                     text = text.replace(m.group(), articletext);
@@ -256,7 +222,7 @@ public class wikiTextParser {
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         while (m.find()) {
-            categories.add( m.group()
+            categories.add(m.group()
                     .replace("[[", "")
                     .replace("]]", "")
                     .replace("Kategorie:", "")
@@ -284,7 +250,7 @@ public class wikiTextParser {
         ArrayList<String> objects = new ArrayList<>();
         //todo infoboxen und {| class... |} zu csv?
         //4 stufig um verschachtelung von objekten aufzuloesen
-        for(int i=0; i<4; i++){
+        for (int i = 0; i < 4; i++) {
             String pattern = "\\{\\{([^{}]*)\\}\\}";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(text);

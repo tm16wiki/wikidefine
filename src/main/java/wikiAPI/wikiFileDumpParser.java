@@ -1,6 +1,7 @@
 package wikiAPI;
 
 import helperClasses.xml;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -77,7 +78,7 @@ public class wikiFileDumpParser {
         long time = System.currentTimeMillis() - starttime - 100;
         //print information
         System.out.println(
-                "finished after " + round(time / 1000.) + " s.\n" +
+                "finished after " + round(time / 1000.) + " s  (" + time + " millis).\n" +
                 round((definitions / ((definitions + errors) * 1.) * 100.)) + "% ( +" + definitions + " / -" + errors + " )" +
                 " prefiltered: " + prefiltered
         );
@@ -105,7 +106,8 @@ public class wikiFileDumpParser {
         @Override
         public synchronized void run() {
             xml xml = new xml();
-            wikiTextParser text = new wikiTextParser();
+            //wikiTextParser text = new wikiTextParser();
+            newTextParser text = new newTextParser();
             String page = "", line;
             try {
                 //seek to chunkstart

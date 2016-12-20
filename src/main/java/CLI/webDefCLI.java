@@ -6,15 +6,16 @@ import asg.cliche.Shell;
 import asg.cliche.ShellDependent;
 import helperClasses.https;
 import helperClasses.xml;
-import wikiAPI.wikiTextParser;
+import wikiAPI.newTextParser;
 
 /**
  * cli for debuging by testing helperclasses and wikiAPI by getting definitions oder article info from the web
  */
 public class webDefCLI implements ShellDependent {
     private static config config;
+    //private wikiTextParser text = new wikiTextParser();
+    newTextParser text = new newTextParser();
     private Shell theShell;
-    private wikiTextParser text = new wikiTextParser();
     private helperClasses.xml xml = new xml();
     private helperClasses.https https = new https();
 
