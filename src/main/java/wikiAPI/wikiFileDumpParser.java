@@ -131,6 +131,9 @@ public class wikiFileDumpParser {
                                 prefiltered++;
                                 reject = true;
                                 break;
+                                //TODO: better condition
+                            } else if (line.contains("==")) {
+                                break;
                             }
                             page += line + "\n";
                             //line = file.readLine();

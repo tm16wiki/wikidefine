@@ -48,7 +48,7 @@ public class newTextParser {
      * @param text article text to unescape
      * @return cleaned text as string
      */
-    public String unescapeArticle(String text) {
+    private String unescapeArticle(String text) {
         String[] replacements;
         String[] escapes;
         escapes = new String[]{
@@ -91,17 +91,10 @@ public class newTextParser {
     public String getDefinition(String article) {
         long starttime = System.currentTimeMillis();
 
-        //TODO good preprocessed ( in filedumpparser? ) shortage of the article
-        for (String s : article.split("\n")) {
-            if (s.length() < 2) {
-            } else {
-                article += s;
-            }
-        }
         article = unescapeArticle(article);
         article = extractText(article);
         article = shortenDefinition(article);
-        article = StringUtils.replace(article, "\n", "");
+        article = StringUtils.replace(article, "\n", " ");
 
         return (System.currentTimeMillis() - starttime) + " " + article;
     }
@@ -113,42 +106,43 @@ public class newTextParser {
      * @return whole dirty definition string
      */
     private String extractText(String article) {
-        String extract = new String();
+        String extract;
         Pattern r;
         Matcher m;
 
         //remove all < > notated tags
-        extract = StringUtils.replaceAll(article, "<!--([^<]*)-->", "");
-        extract = StringUtils.replaceAll(extract, "<(\\w*)>([^<]*)<\\/(\\w*)>", "");
-        extract = StringUtils.replaceAll(extract, "<ref ([^<]*) \\/>", "");
+        extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
+        extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
+        extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?: \\/>)", "");
         extract = StringUtils.replace(extract, "<br />", "");
         extract = StringUtils.replace(extract, "<nowiki />", "");
         extract = StringUtils.replace(extract, "<references />", "");
 
         //remove all [[ ]] tags
         //remove articles keep text
-        r = Pattern.compile("(\\[\\[)([^:\\[\\]]*)(\\]\\])");
+        r = Pattern.compile("(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])");
         m = r.matcher(extract);
         while (m.find()) {
-            String atext = m.group(2);
+            //TODO FEHLER
+            String atext = m.group(1);
             String text;
             //removes text link from article tag
             if (atext.contains("|")) {
                 text = atext.substring(atext.indexOf("|") + 1, atext.length());
                 extract = StringUtils.replace(extract, m.group(), text);
             } else {
-                extract = StringUtils.replace(extract, m.group(), m.group(2));
+                extract = StringUtils.replace(extract, m.group(), m.group(1));
             }
         }
         //remove files, picture, categories and other
-        extract = StringUtils.replaceAll(extract, "(\\[\\[)(\\w)*:(.*)(\\]\\])", "");
+        extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:.*)(?:\\]\\])", "");
 
         //remove all {{ }} tags
         //remove wikipediaobjects
         //4 level deep e.g. infoboxes
         //todo: z.b. Talk (Mineral)
-        for (int i = 0; i < 2; i++) {
-            r = Pattern.compile("(\\{\\{)([^\\{\\}]*)(\\}\\})");
+        for (int i = 0; i < 4; i++) {
+            r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
             m = r.matcher(extract);
             while (m.find()) {
                 extract = extract.replace(m.group(), "");
@@ -156,20 +150,22 @@ public class newTextParser {
         }
 
         //wikiclasses
-        extract = StringUtils.replaceAll(extract, "\\{\\| class([^{]*)\\|\\}", "");
+        extract = StringUtils.replaceAll(extract, "(?:\\{\\| class)(?:[^{]*)(?:\\|\\})", "");
 
         //exclude links
-        extract = StringUtils.replaceAll(extract, "\\[htttp(.*)\\]", "");
+        extract = StringUtils.replaceAll(extract, "(?:\\[htttp)(?:.*)(?:\\])", "");
 
         //remove headlines
-        extract = StringUtils.replaceAll(extract, "== (.*) ==", "");
+        extract = StringUtils.replaceAll(extract, "(?:== )(?:.*)(?: ==)", "");
+
+
 
         return extract;
     }
 
     public ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
-        String pattern = "(\\[\\[)Datei:(.*)(\\]\\])";
+        String pattern = "(?:\\[\\[)Datei:(.*)(?:\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         while (m.find()) {
@@ -179,12 +175,7 @@ public class newTextParser {
             if (file.contains("|")) {
                 file = file.substring(0, file.indexOf("|"));
             }
-            files.add(
-                    file
-                            .replace("[[", "")
-                            .replace("]]", "")
-                            .replace("Datei:", "")
-            );
+            files.add(m.group(1));
         }
         return files;
     }
@@ -193,12 +184,12 @@ public class newTextParser {
     public ArrayList<String> findArticles(String text) {
         ArrayList<String> articles = new ArrayList<>();
         //Regex für artikel [[ ... ]] ('[' und ']’ ausgeschlossen falls verschachtelt)
-        String pattern = "(\\[\\[)([^:\\[\\]]*)(\\]\\])";
+        String pattern = "(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         for (int i = 0; i < 2; i++) {
             while (m.find()) {
-                String article = m.group(2);
+                String article = m.group(1);
                 String articletext;
                 //removes text link from article tag
                 if (article.contains("|")) {
@@ -207,8 +198,8 @@ public class newTextParser {
                     articles.add(article);
                     text = text.replace(m.group(), articletext);
                 } else {
-                    articles.add(m.group(2));
-                    text = text.replace(m.group(), m.group(2));
+                    articles.add(m.group(1));
+                    text = text.replace(m.group(), m.group(1));
                 }
             }
         }
@@ -218,15 +209,11 @@ public class newTextParser {
 
     public ArrayList<String> findCategories(String text) {
         ArrayList<String> categories = new ArrayList<>();
-        String pattern = "(\\[\\[)Kategorie:([^\\[\\]]*)(\\]\\])";
+        String pattern = "(?:\\[\\[)(?:Kategorie:)([^\\[\\]]*)(?:\\]\\])";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(text);
         while (m.find()) {
-            categories.add(m.group()
-                    .replace("[[", "")
-                    .replace("]]", "")
-                    .replace("Kategorie:", "")
-                    .replace("|", "")
+            categories.add(m.group(1).replace("|", "")
             );
         }
         return categories;
@@ -251,7 +238,7 @@ public class newTextParser {
         //todo infoboxen und {| class... |} zu csv?
         //4 stufig um verschachtelung von objekten aufzuloesen
         for (int i = 0; i < 4; i++) {
-            String pattern = "\\{\\{([^{}]*)\\}\\}";
+            String pattern = "(?:\\{\\{)([^{}]*)(?:\\}\\})";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(text);
             while (m.find()) {
