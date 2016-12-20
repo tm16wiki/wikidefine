@@ -107,7 +107,6 @@ public class newTextParser {
      */
     private String extractText(String article) {
         String extract;
-        Pattern r;
         Matcher m;
 
         //remove all < > notated tags
@@ -118,47 +117,59 @@ public class newTextParser {
         extract = StringUtils.replace(extract, "<nowiki />", "");
         extract = StringUtils.replace(extract, "<references />", "");
 
-        //remove all [[ ]] tags
-        //remove articles keep text
-        r = Pattern.compile("(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])");
-        m = r.matcher(extract);
-        while (m.find()) {
-            //TODO FEHLER
-            String atext = m.group(1);
-            String text;
-            //removes text link from article tag
-            if (atext.contains("|")) {
-                text = atext.substring(atext.indexOf("|") + 1, atext.length());
-                extract = StringUtils.replace(extract, m.group(), text);
-            } else {
-                extract = StringUtils.replace(extract, m.group(), m.group(1));
-            }
-        }
-        //remove files, picture, categories and other
-        extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:.*)(?:\\]\\])", "");
-
-        //remove all {{ }} tags
-        //remove wikipediaobjects
-        //4 level deep e.g. infoboxes
-        //todo: z.b. Talk (Mineral)
-        for (int i = 0; i < 4; i++) {
-            r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
+        try {
+            //remove all [[ ]] tags
+            //remove articles keep text
+            Pattern r = Pattern.compile("(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])");
+            r.matcher(extract).find();
             m = r.matcher(extract);
             while (m.find()) {
-                extract = extract.replace(m.group(), "");
+                //TODO FEHLER
+                String atext = m.group(1);
+                String text;
+                //removes text link from article tag
+                if (atext.contains("|")) {
+                    text = atext.substring(atext.indexOf("|") + 1, atext.length());
+                    extract = StringUtils.replace(extract, m.group(), text);
+                } else {
+                    extract = StringUtils.replace(extract, m.group(), m.group(1));
+                }
             }
+            //remove files, picture, categories and other
+            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:.*)(?:\\]\\])", "");
+
+            //remove all {{ }} tags
+            //remove wikipediaobjects
+            //4 level deep e.g. infoboxes
+            //todo: z.b. Talk (Mineral)
+            for (int i = 0; i < 4; i++) {
+                r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
+                m = r.matcher(extract);
+                while (m.find()) {
+                    extract = StringUtils.replace(extract, m.group(), "");
+                }
+            }
+        } catch (NullPointerException e) {
+            return "..";
         }
 
-        //wikiclasses
-        extract = StringUtils.replaceAll(extract, "(?:\\{\\| class)(?:[^{]*)(?:\\|\\})", "");
+        //remove all {| |} tags e.g. wikiclasses
+        extract = StringUtils.replaceAll(extract, "(?:\\{\\|)(?:[^{]*)(?:\\|\\})", "");
 
         //exclude links
         extract = StringUtils.replaceAll(extract, "(?:\\[htttp)(?:.*)(?:\\])", "");
 
-        //remove headlines
+        //remove ==  == tags e.g. headlines
         extract = StringUtils.replaceAll(extract, "(?:== )(?:.*)(?: ==)", "");
 
-
+        extract = StringUtils.replace(extract, "(; ", "(");
+        extract = StringUtils.replace(extract, "(, ", "(");
+        extract = StringUtils.replace(extract, "[]", "");
+        extract = StringUtils.replace(extract, "()", "");
+        extract = StringUtils.replace(extract, "�", "");
+        extract = StringUtils.replace(extract, " : ", "");
+        extract = StringUtils.replace(extract, " ; ", "");
+        extract = StringUtils.replace(extract, "__NOTOC__", "");
 
         return extract;
     }
