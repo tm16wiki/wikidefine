@@ -65,8 +65,6 @@ public class newTextParser {
                 "&icirc;", "&iuml;", "&eth;", "&ntilde;", "&ograve;", "&oacute;", "&ocirc;", "&otilde;", "&ouml;",
                 "&oslash;", "&ugrave;", "&uacute;", "&ucirc;", "&uuml;", "&yacute;", "&thorn;", "&yuml;"
                 */
-                //wikipedia escape sequences
-                "'''", "''",
         };
         replacements = new String[]{
                 //html escape sequence replacements
@@ -76,9 +74,11 @@ public class newTextParser {
                 "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ", "ß", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì",
                 "í", "î", "ï", "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "þ", "ÿ"
                 */
-                //wikipedia escapesequence replacements
-                "\"", "\"",
         };
+
+
+        text = StringUtils.replace(text, "'''", "\"");
+        text = StringUtils.replace(text, "''", "\"");
         return StringUtils.replaceEachRepeatedly(text, escapes, replacements);
     }
 
@@ -121,7 +121,6 @@ public class newTextParser {
             //remove all [[ ]] tags
             //remove articles keep text
             Pattern r = Pattern.compile("(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])");
-            r.matcher(extract).find();
             m = r.matcher(extract);
             while (m.find()) {
                 //TODO FEHLER
@@ -184,7 +183,7 @@ public class newTextParser {
             //todo: filetags finden?
             //removes picturetags and text from file tag
             if (file.contains("|")) {
-                file = file.substring(0, file.indexOf("|"));
+                files.add(file.substring(0, file.indexOf("|")));
             }
             files.add(m.group(1));
         }
