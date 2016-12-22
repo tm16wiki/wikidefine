@@ -76,10 +76,15 @@ public class newTextParser {
                 */
         };
 
-
         text = StringUtils.replace(text, "'''", "\"");
         text = StringUtils.replace(text, "''", "\"");
-        return StringUtils.replaceEachRepeatedly(text, escapes, replacements);
+
+        //wegen [http://www.wip...ountry_codes&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;rdquo; in "African Regional Intellectual Property Organization"
+        try {
+            return StringUtils.replaceEachRepeatedly(text, escapes, replacements);
+        } catch (IllegalStateException e) {
+            return text;
+        }
     }
 
     /**
