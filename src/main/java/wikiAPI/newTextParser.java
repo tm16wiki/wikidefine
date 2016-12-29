@@ -94,14 +94,15 @@ public class newTextParser {
      * @return clean compact definition string
      */
     public String getDefinition(String article) {
-        long starttime = System.currentTimeMillis();
+        //long starttime = System.currentTimeMillis();
 
         article = unescapeArticle(article);
         article = extractText(article);
         article = shortenDefinition(article);
         article = StringUtils.replace(article, "\n", " ");
 
-        return (System.currentTimeMillis() - starttime) + " " + article;
+        //System.out.print(System.currentTimeMillis() - starttime);
+        return article;
     }
 
     /**

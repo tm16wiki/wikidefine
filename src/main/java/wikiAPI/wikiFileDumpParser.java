@@ -142,6 +142,7 @@ public class wikiFileDumpParser {
                         if (!reject) {
                             String article = xml.getTagValue(page, "text");
                             String title = xml.getTagValue(page, "title");
+                            int id = Integer.parseInt(xml.getTagValue(page, "id"));
                             String definition = text.getDefinition(article);
                             //TODO: postevaluate
                             if (evaluateDefinition(definition)) {
@@ -149,7 +150,7 @@ public class wikiFileDumpParser {
                                     System.out.println("+ " + title + " : " + definition);
                                 }
                                 if (db != null) {
-                                    db.insertDefinition(title, definition);
+                                    db.insertDefinition(id, title, definition);
                                 }
                             } else {
                                 if (verbose) {

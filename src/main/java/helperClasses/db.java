@@ -1,7 +1,8 @@
 package helperClasses;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.*;
 
 /**
@@ -27,7 +28,9 @@ public class db {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:" + path);
             System.out.printf("connected!\n");
-            executeDBScript("./src/main/resources/definition.sqlite.sql");
+            //setup
+            executeDBScript("config.sql");
+            executeDBScript("definition.sqlite.sql");
         } catch (SQLException e) {
             System.out.printf("Error!\n");
         } catch (ClassNotFoundException e) {
@@ -52,7 +55,8 @@ public class db {
                 Class.forName("org.postgresql.Driver");
                 System.out.printf("connected!\n");
                 //setup table
-                executeDBScript("./src/main/resources/definition.postgresql.sql");
+                executeDBScript("definition.postgre.sql");
+
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
             } catch (ClassNotFoundException e) {
@@ -68,7 +72,7 @@ public class db {
                 Class.forName("com.mysql.jdbc.Driver\"");
                 System.out.printf("connected!\n");
                 //setup table
-                executeDBScript("./src/main/resources/definition.mysql.sql");
+                executeDBScript("definition.mysql.sql");
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
             } catch (ClassNotFoundException e) {
@@ -87,7 +91,6 @@ public class db {
         Statement stmt;
         try {
             stmt = c.createStatement();
-
             ResultSet rs = stmt.executeQuery(query);
             if (rs != null) {
                 return rs;
@@ -107,12 +110,14 @@ public class db {
     /**
      * inserts definition into db
      *
+     *
+     * @param id
      * @param title      of the article
      * @param definition generated definition
      * @return returns boolean
      */
-    public boolean insertDefinition(String title, String definition) {
-        return execQuery("insert into definition(title, text) values('" + title + "', '" + definition + "');") != null;
+    public boolean insertDefinition(int id, String title, String definition) {
+        return execQuery("insert into definition( id, title, text) values('" + id + "', '" + title + "', '" + definition + "');") != null;
     }
 
     /**
@@ -129,7 +134,6 @@ public class db {
     public boolean insertConfiguration(String name, String lang, String filepath, String dbpath, String dbuser, String dbpassword) {
         try {
             Statement stmt = c.createStatement();
-            //stmt.executeQuery("create table if not exists definitions( title");
             stmt.executeQuery("insert into config(name, language, file, exportdb, dbuser, dbpassword) values('" +
                     name + "' , '" +
                     lang + "', '" +
@@ -154,7 +158,8 @@ public class db {
         boolean isScriptExecuted = false;
         try {
             Statement stmt = c.createStatement();
-            BufferedReader in = new BufferedReader(new FileReader(filepath));
+            InputStream i = this.getClass().getClassLoader().getResourceAsStream(filepath);
+            BufferedReader in = new BufferedReader(new InputStreamReader(i));
             String line;
             StringBuilder stringBuffer = new StringBuilder();
             while ((line = in.readLine()) != null) {

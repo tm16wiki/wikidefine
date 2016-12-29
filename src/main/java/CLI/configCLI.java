@@ -1,12 +1,15 @@
 package CLI;
 
-import asg.cliche.*;
+import asg.cliche.Command;
+import asg.cliche.Param;
+import asg.cliche.Shell;
+import asg.cliche.ShellFactory;
 import helperClasses.db;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class configCLI {
@@ -17,12 +20,14 @@ public class configCLI {
 
 
     private configCLI() {
-        String sqlitepath = "./src/main/resources/config.db";
+        String sqlitepath = Paths.get(".").toAbsolutePath().normalize().toString() + "/config.db";
         localdb = new db(sqlitepath);
         loadconfig("default");
     }
 
     public static void main(String[] args) {
+
+
         shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new configCLI());
         try {
             System.out.println("\n====   CONFIGURATIONS   ====");
@@ -84,8 +89,8 @@ public class configCLI {
             if (results == 0) {
                 System.out.println("error loading configuration "+ name);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
     }
 
@@ -125,6 +130,7 @@ public class configCLI {
                 dbpassword = scan.nextLine();
             }
             localdb.insertConfiguration(name, lang, filepath, dbpath, dbuser, dbpassword);
+            loadconfig(name);
         } catch (Exception e) {
             System.out.println("can't create config");
             e.printStackTrace();
@@ -135,8 +141,8 @@ public class configCLI {
             abbrev = "ls",
             description = "list configuration")
     public void listconfig() {
-        ResultSet rs = localdb.execQuery("select * from config;");
         try {
+            ResultSet rs = localdb.execQuery("select * from config;");
             System.out.println("id name:\t\tlang\tfile\t\t\tdb");
             while (rs.next()) {
                 System.out.print(rs.getInt("id") + " ");
@@ -150,8 +156,8 @@ public class configCLI {
                 System.out.print(rs.getString("dbuser") + "\t");
                 System.out.print(rs.getString("dbpassword") + "\n");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
     }
 
