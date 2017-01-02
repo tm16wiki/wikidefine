@@ -120,13 +120,17 @@ public class wikiFileDumpParser {
                         line = readLineUTF();
                         boolean reject = false;
                         while (!Objects.requireNonNull(line).contains("</page>") ) {
-                            //TODO: prefilter for lists or redirects
                             if (line.contains("#REDIRECT") ||
+                                    line.contains("#Redirect") ||
+                                    line.contains("#redirect") ||
                                     line.contains("#WEITERLEITUNG") ||
+                                    line.contains("#Weiterleitung") ||
+                                    line.contains("#weiterleitung") ||
                                     line.contains("<title>List") ||
                                     line.contains("<title>Wikipedia:") ||
-                                    line.contains("#redirect") ||
-                                    line.contains("#Redirect")
+                                    line.contains("<title>Vorlage:") ||
+                                    line.contains("<title>Kategorie:") ||
+                                    line.contains("<title>Datei:")
                                     ) {
                                 prefiltered++;
                                 reject = true;
@@ -144,7 +148,7 @@ public class wikiFileDumpParser {
                             String title = xml.getTagValue(page, "title");
                             int id = Integer.parseInt(xml.getTagValue(page, "id"));
                             String definition = text.getDefinition(article);
-                            //TODO: postevaluate
+                            //postevaluate
                             if (evaluateDefinition(definition)) {
                                 if (verbose) {
                                     System.out.println("+ " + title + " : " + definition);
@@ -173,7 +177,7 @@ public class wikiFileDumpParser {
          */
         private String readLineUTF() {
             //set buffersize
-            int buffersize = 128;
+            int buffersize = 256;
             try {
                 String line = "";
                 //remember position

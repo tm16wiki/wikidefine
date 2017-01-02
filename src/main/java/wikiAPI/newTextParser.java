@@ -148,7 +148,6 @@ public class newTextParser {
             Pattern r = Pattern.compile("(?:\\[\\[)([^:\\[\\]]*)(?:\\]\\])");
             m = r.matcher(extract);
             while (m.find()) {
-                //TODO FEHLER
                 String atext = m.group(1);
                 String text;
                 //removes text link from article tag
@@ -166,7 +165,7 @@ public class newTextParser {
             //remove wikipediaobjects
             //4 level deep e.g. infoboxes
             //todo: z.b. Talk (Mineral)
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 3; i++) {
                 r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
                 m = r.matcher(extract);
                 while (m.find()) {
@@ -205,7 +204,7 @@ public class newTextParser {
         Matcher m = r.matcher(text);
         while (m.find()) {
             String file = m.group();
-            //todo: filetags finden?
+            //todo: filetags
             //removes picturetags and text from file tag
             if (file.contains("|")) {
                 files.add(file.substring(0, file.indexOf("|")));
