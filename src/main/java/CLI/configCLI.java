@@ -183,7 +183,6 @@ class config {
         config.dbpassword = dbpasswort;
         if(dbpath.contains("postgresql://") || dbpath.contains("postgresql://")){
             database = new  db(dbpath, dbuser, dbpasswort);
-            System.out.println("loging in");
         }else if (dbpath.equals("null")){
             database = null;
         }

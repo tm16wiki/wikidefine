@@ -59,6 +59,7 @@ public class db {
 
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
+                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.out.println("Error loading driver");
             }
@@ -116,8 +117,12 @@ public class db {
      * @param definition generated definition
      * @return returns boolean
      */
-    public boolean insertDefinition(int id, String title, String definition) {
-        return execQuery("insert into definition( id, title, text) values('" + id + "', '" + title + "', '" + definition + "');") != null;
+    public void insertDefinition(int id, String title, String definition) {
+        try {
+            execQuery("insert into definition( id, title, text) values('" + id + "', '" + title + "', '" + definition + "');");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
