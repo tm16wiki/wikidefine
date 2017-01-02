@@ -11,33 +11,52 @@ public class newTextParser {
 
 
     private static String shortenDefinition(String str) {
+        str = str.replaceAll("\\s+", " "); // remove multiple whitespaces
         String finalstr = "";
+        int sentences = 0;
+        int brackets = 0;
         String[] segs = str.split(Pattern.quote("."));
         String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
 
-        for (int i = 0; i < segs.length; i++) {
-            // TODO: Catch IndexOutOfBounds Exception
-            if (finalstr.length() >= 200) { // pruefe ob satzende
-                if (i < segs.length && i > 0 && segs[i - 1].length() > 5 && segs[i].length() > 2 && segs[i - 1].contains(" ")) { // Segmente gross genug zum Untersuchen
+        while (sentences < 2) {
+            for (int i = 0; i < segs.length; i++) {
+                if (segs[i].contains("(")) {
+                    brackets++;
+                }
+                if (segs[i].contains(")")) {
+                    brackets--;
+                }
+                // TODO: Catch IndexOutOfBounds Exception
+                if (i < segs.length && i > 0 && segs[i - 1].length() > 5 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
                     // pruefe ob aktueller chunk neuer satz ist
                     if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
-                            && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
-                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches("\\d*") // direkt vor Punkt steht keine Zahl
+                            //&& segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
+                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+") // direkt vor Punkt steht keine Zahl
                             && !segs[i - 1].substring(segs[i - 1].length() - 2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
                             && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
-                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(consonants + "*") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
-                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches("(^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
+                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" "+consonants+"+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
+                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" (^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
                             ) {
-                        break; // neuer satz soll nicht reingenommen werden
-                    } else { // noch kein satzende erreicht - weiter
+                        sentences++; // neues Satzende gefunden
+                        if (segs[i].substring(1, 2).matches("[=]") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
+                            break;
+                        }
+                        if (sentences < 2) {
+                            finalstr += segs[i] + ".";
+                        } else {
+                            break; // Gewuenschte Anzahl Saetze gefunden
+                        }
+                    } else { // noch kein Satzende erreicht - weiter
                         finalstr += segs[i] + ".";
                     }
-                } else { // Segmente zu klein -> reinnehmen
-                    finalstr += segs[i] + ".";
+                } else {
+                    finalstr += segs[i] + "."; // skippe aktuelles segment
                 }
-            } else {
-                finalstr += segs[i] + "."; // noch keine 300 Zeichen erreicht
             }
+            break;
+        }
+        if (finalstr.length() > 3 && finalstr.substring(finalstr.length() - 3).matches(". .")) {
+            finalstr = finalstr.substring(0, finalstr.length() - 2);
         }
         return finalstr;
     }
