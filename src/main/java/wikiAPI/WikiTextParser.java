@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class newTextParser {
+public class WikiTextParser {
 
 
     private static String shortenDefinition(String str) {
@@ -34,7 +34,7 @@ public class newTextParser {
                             && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+") // direkt vor Punkt steht keine Zahl
                             && !segs[i - 1].substring(segs[i - 1].length() - 2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
                             && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
-                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" "+consonants+"+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
+                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" " + consonants + "+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
                             && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" (^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
                             ) {
                         sentences++; // neues Satzende gefunden

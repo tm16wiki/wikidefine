@@ -43,7 +43,7 @@ public class https {
             loadCertInfo(con);
             loadContent(con);
         } catch (IOException e) {
-            System.out.println("can't load "+ https_url);
+            System.out.println("can't load " + https_url);
             return false;
         }
         return true;
@@ -52,6 +52,7 @@ public class https {
 
     /**
      * loads certificates from given connetion
+     *
      * @param con connection to load from
      */
     private void loadCertInfo(HttpsURLConnection con) throws IOException {
@@ -73,6 +74,7 @@ public class https {
 
     /**
      * loads content from given https connection
+     *
      * @param con httpsURLConnection
      */
     private void loadContent(HttpsURLConnection con) throws IOException {
@@ -83,7 +85,7 @@ public class https {
                             new InputStreamReader(con.getInputStream()));
             String input;
             while ((input = br.readLine()) != null) {
-                lines+=input+"\n";
+                lines += input + "\n";
             }
             br.close();
         }
@@ -92,6 +94,7 @@ public class https {
 
     /**
      * getter method for the content
+     *
      * @return returns contentstring
      */
     public String getContent() {
@@ -100,6 +103,7 @@ public class https {
 
     /**
      * getter method for the certificate information
+     *
      * @return returns certificatestring
      */
     public String getCertInfo() {
@@ -108,6 +112,7 @@ public class https {
 
     /**
      * getter method for the url
+     *
      * @return returns url
      */
     public String getURL() {
@@ -116,6 +121,7 @@ public class https {
 
     /**
      * getter method for the timestamp
+     *
      * @return returns timestamp
      */
     public Date getTimestamp() {
@@ -124,6 +130,7 @@ public class https {
 
     /**
      * getter method for the https certificates
+     *
      * @return array of certificates
      */
     public Certificate[] getCertificates() {

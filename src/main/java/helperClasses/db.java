@@ -29,8 +29,8 @@ public class db {
             c = DriverManager.getConnection("jdbc:sqlite:" + path);
             System.out.printf("connected!\n");
             //setup
-            executeDBScript("config.sql");
-            executeDBScript("definition.sqlite.sql");
+            executeDBScript("Skripts/config.sql");
+            executeDBScript("Skripts/definition.sqlite.sql");
         } catch (SQLException e) {
             System.out.printf("Error!\n");
         } catch (ClassNotFoundException e) {
@@ -55,7 +55,7 @@ public class db {
                 Class.forName("org.postgresql.Driver");
                 System.out.printf("connected!\n");
                 //setup table
-                executeDBScript("definition.postgre.sql");
+                executeDBScript("Skripts/definition.postgre.sql");
 
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
@@ -110,7 +110,6 @@ public class db {
 
     /**
      * inserts definition into db
-     *
      *
      * @param id
      * @param title      of the article

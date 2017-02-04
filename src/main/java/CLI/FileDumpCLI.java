@@ -5,13 +5,13 @@ import asg.cliche.Param;
 import asg.cliche.Shell;
 import asg.cliche.ShellDependent;
 import helperClasses.db;
-import wikiAPI.wikiFileDumpParser;
+import wikiAPI.WikiFileDumpParser;
 
 
 /**
  * class to controll the fildumpparser by cli
  */
-public class fileDumpCLI implements ShellDependent {
+public class FileDumpCLI implements ShellDependent {
     private Shell theShell;
     private boolean stats = false;
     private boolean verbose = true;
@@ -28,11 +28,11 @@ public class fileDumpCLI implements ShellDependent {
      *
      * @param config configuration to load
      */
-    fileDumpCLI(config config) {
-        this.filepath = CLI.config.getFilepath();
-        if (CLI.config.getDbpath() != null) {
-            this.exportDB = CLI.config.getDatabase();
-            this.dbpath = CLI.config.getDbpath();
+    FileDumpCLI(Config config) {
+        this.filepath = CLI.Config.getFilepath();
+        if (CLI.Config.getDbpath() != null) {
+            this.exportDB = CLI.Config.getDatabase();
+            this.dbpath = CLI.Config.getDbpath();
         }
         showconfig();
     }
@@ -62,16 +62,22 @@ public class fileDumpCLI implements ShellDependent {
             abbrev = "r",
             description = "creates definitions out of file")
     public void run() {
+        Thread task;
         if (!export) {
-            new wikiFileDumpParser(threads, max, stats, verbose, filepath, null);
+            task = new Thread(new WikiFileDumpParser(threads, max, stats, verbose, filepath, null));
         } else {
-            new wikiFileDumpParser(threads, max, stats, verbose, filepath, exportDB);
+            task = new Thread(new WikiFileDumpParser(threads, max, stats, verbose, filepath, exportDB));
+        }
+        task.start();
+        while (task.isAlive()){
+            System.out.print("aoisudhfapsdfhuapweoufh\npskdfjn\n");
         }
     }
 
 
     /**
      * setter for the shell
+     *
      * @param theShell shell to set
      */
     public void cliSetShell(Shell theShell) {
@@ -111,12 +117,9 @@ public class fileDumpCLI implements ShellDependent {
         showconfig();
     }
 
-    /**!stats;
-     showconfig();
-     }
-
-     /**
+    /**
      * sets the vaulue for the maximum
+     *
      * @param max maximmum to set
      */
     @Command(name = "settmax",
@@ -129,6 +132,7 @@ public class fileDumpCLI implements ShellDependent {
 
     /**
      * changes the filepath of the xml dump
+     *
      * @param filepath path to file
      */
     @Command(name = "setpath",
@@ -141,6 +145,7 @@ public class fileDumpCLI implements ShellDependent {
 
     /**
      * changes the amount of threads to spawn
+     *
      * @param threads amount of threads to spawn
      */
     @Command(name = "setthreads",
