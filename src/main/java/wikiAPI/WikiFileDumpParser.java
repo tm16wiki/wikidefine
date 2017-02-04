@@ -111,6 +111,15 @@ public class WikiFileDumpParser extends Task implements Runnable {
         return null;
     }
 
+    @Override
+    public void run() {
+        try {
+            call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private class fileThread extends Thread {
         private int id;

@@ -70,7 +70,6 @@ public class FileDumpCLI implements ShellDependent {
         }
         task.start();
         while (task.isAlive()){
-            System.out.print("aoisudhfapsdfhuapweoufh\npskdfjn\n");
         }
     }
 

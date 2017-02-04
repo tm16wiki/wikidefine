@@ -40,7 +40,6 @@ public class LangFilter {
                 "<title>Kategorie:",
                 "<title>Datei:"
         )) {
-            System.out.println("redirect");
             return true;
         }
 
