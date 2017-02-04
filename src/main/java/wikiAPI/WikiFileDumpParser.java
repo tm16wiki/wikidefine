@@ -1,8 +1,11 @@
 package wikiAPI;
 
+import helperClasses.LangFilter;
+import helperClasses.xml;
 import javafx.concurrent.Task;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Objects;
 
@@ -13,17 +16,14 @@ import static java.lang.StrictMath.round;
  */
 public class WikiFileDumpParser extends Task implements Runnable {
 
+    public Thread[] threads;
     private int pages = 0;
     private int prefiltered = 0;
     private int definitions = 0;
     private int errors = 0;
-
-
     private long chunksize;
     private long filesize;
     private long progress;
-
-    public Thread[] threads;
     private int max;
     private boolean printstats = false;
     private boolean verbose = false;
@@ -133,12 +133,64 @@ public class WikiFileDumpParser extends Task implements Runnable {
          */
         @Override
         public synchronized void run() {
+            xml xml = new xml();
+            long oldprogress = chunksize * (id);
+
+            WikiTextParser text = new WikiTextParser();
+            String page = "", line;
             try {
-                call();
-            } catch (Exception e) {
+                //seek to chunkstart
+                file.seek(chunksize * (id));
+                long pos = file.getChannel().position();
+                while ((line = file.readLine()) != (null) && pos < chunksize * (id + 1) && pages - prefiltered <= max) {
+                    pos = file.getChannel().position();
+                    if (line.contains("<page>")) { //line.contains("<page id=") { //for preprocessed pages
+                        pages++;
+                        progress += pos - oldprogress;
+                        oldprogress = pos;
+                        line = readLineUTF();
+                        boolean reject = false;
+                        while (!Objects.requireNonNull(line).contains("</page>")) {
+                            if (LangFilter.check("DE", line) || LangFilter.check("EN", line)) {
+                                prefiltered++;
+                                reject = true;
+                                break;
+                                //TODO: better condition
+                            } else if (line.contains("==")) {
+                                break;
+                            }
+                            page += line + "\n";
+                            //line = file.readLine();
+                            line = readLineUTF();
+                        }
+                        if (!reject) {
+                            String article = xml.getTagValue(page, "text");
+                            String title = xml.getTagValue(page, "title");
+                            int id = Integer.parseInt(xml.getTagValue(page, "id"));
+                            String definition = text.getDefinition(article);
+                            //postevaluate
+                            if (evaluateDefinition(definition)) {
+                                if (verbose) {
+                                    System.out.println("+ " + title + " : " + definition);
+                                }
+                                if (db != null) {
+                                    db.insertDefinition(id, title, definition);
+                                }
+                            } else {
+                                if (verbose) {
+                                    System.out.println("- " + title + " : " + definition);
+                                }
+                            }
+                        }
+                        page = "";
+                    }
+                }
+                file.close();
+            } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             }
         }
+
 
         /**
          * reads next line from cursor and converts it to UTF-8
