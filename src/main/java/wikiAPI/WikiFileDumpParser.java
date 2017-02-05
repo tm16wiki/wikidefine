@@ -98,6 +98,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                     }
                 }
                 Thread.sleep(5000);
+                updateProgress(0, 100);
             }
 
             if (printstats) {
