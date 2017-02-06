@@ -4,8 +4,12 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -18,7 +22,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 public class MainViewmodel {
-
+    @FXML
+    AnchorPane mainAnchorPane;
+    @FXML
+    Button runButton;
     @FXML
     TextField pathTextBox;
     @FXML
@@ -59,7 +66,14 @@ public class MainViewmodel {
         statisticToggleCheckBox.selectedProperty().bindBidirectional(statisticToggle);
         verboseToggleCheckBox.selectedProperty().bindBidirectional(verboseToggle);
         dbToggleCheckBox.selectedProperty().bindBidirectional(dbToggle);
-        dataBaseVBox.disableProperty().bindBidirectional(dbToggle);
+
+        dataBaseVBox.visibleProperty().bindBidirectional(dbToggle);
+        dataBaseVBox.managedProperty().bindBidirectional(dbToggle);
+
+        runButton.setGraphic( new ImageView( new Image(this.getClass().getResourceAsStream("/Theme/RunButton.png") )));
+
+
+
 
         threadNumberComboBox.getItems().addAll(
                 "1", "2", "3", "4", "5", "6", "7", "8"
