@@ -25,22 +25,6 @@ public class ConfigCLI {
         loadconfig("default");
     }
 
-    public static void main(String[] args) {
-
-
-        shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new ConfigCLI());
-        try {
-            System.out.println("\n====   CONFIGURATIONS   ====");
-            shell.processLine("ls");
-            if (CLI.Config.getLang() == null) {
-                System.out.println("\ncreating new configuration. please name it default.");
-                shell.processLine("nc");
-            }
-            shell.commandLoop();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     @Command(name = "webdef",
             abbrev = "wd",

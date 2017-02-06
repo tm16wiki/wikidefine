@@ -10,21 +10,22 @@ import javafx.stage.Stage;
 public class App extends Application {
 
     public static void main(String[] args) {
-        launch();
 
-        Shell shell;
-
-        shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new ConfigCLI());
-        try {
-            System.out.println("\n====   CONFIGURATIONS   ====");
-            shell.processLine("ls");
-            if (CLI.Config.getLang() == null) {
-                System.out.println("\ncreating new configuration. please name it default.");
-                shell.processLine("nc");
+        if(args.length>0 && args[0].contains("gui")){
+            launch();
+        }else {
+            Shell shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new ConfigCLI());
+            try {
+                System.out.println("\n====   CONFIGURATIONS   ====");
+                shell.processLine("ls");
+                if (CLI.Config.getLang() == null) {
+                    System.out.println("\ncreating new configuration. please name it default.");
+                    shell.processLine("nc");
+                }
+                shell.commandLoop();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            shell.commandLoop();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
