@@ -1,17 +1,12 @@
 package GUI;
 
 import javafx.application.Platform;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
@@ -36,13 +31,35 @@ public class MainViewmodel {
     ComboBox langComboBox;
     @FXML
     TextArea consoleTextArea;
+    @FXML
+    CheckBox maxToggleCheckBox;
+    @FXML
+    CheckBox verboseToggleCheckBox;
+    @FXML
+    CheckBox statisticToggleCheckBox;
+    @FXML
+    CheckBox dbToggleCheckBox;
+    @FXML
+    VBox dataBaseVBox;
+
     PrintStream ps;
+
+    private BooleanProperty dbToggle = new SimpleBooleanProperty(false);
+    private BooleanProperty verboseToggle = new SimpleBooleanProperty(false);
+    private BooleanProperty statisticToggle = new SimpleBooleanProperty(true);
+    private BooleanProperty maxToggle = new SimpleBooleanProperty(true);
     private StringProperty path = new SimpleStringProperty();
-    private IntegerProperty max = new SimpleIntegerProperty();
+    private IntegerProperty max = new SimpleIntegerProperty(Integer.MAX_VALUE);
 
     public void initialize(){
         pathTextBox.textProperty().bindBidirectional(path);
         maxTextBox.textProperty().bindBidirectional(max, new NumberStringConverter());
+        maxToggleCheckBox.selectedProperty().bindBidirectional(maxToggle);
+        maxTextBox.disableProperty().bindBidirectional(maxToggle);
+        statisticToggleCheckBox.selectedProperty().bindBidirectional(statisticToggle);
+        verboseToggleCheckBox.selectedProperty().bindBidirectional(verboseToggle);
+        dbToggleCheckBox.selectedProperty().bindBidirectional(dbToggle);
+        dataBaseVBox.disableProperty().bindBidirectional(dbToggle);
 
         threadNumberComboBox.getItems().addAll(
                 "1", "2", "3", "4", "5", "6", "7", "8"
@@ -75,7 +92,7 @@ public class MainViewmodel {
     private void runParser(ActionEvent e) {
         int threadcount = threadNumberComboBox.getSelectionModel().getSelectedIndex() + 1;
 
-        Task copyWorker = new WikiFileDumpParser(threadcount, max.getValue(), true, false, path.get(), null);
+        Task copyWorker = new WikiFileDumpParser(threadcount, max.getValue(), statisticToggle.getValue(), verboseToggle.getValue(), path.get(), null);
         progressBar.progressProperty().unbind();
         progressBar.progressProperty().bind(copyWorker.progressProperty());
         new Thread(copyWorker).start();

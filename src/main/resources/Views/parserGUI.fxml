@@ -2,46 +2,120 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<GridPane xmlns:fx="http://javafx.com/fxml/1" alignment="center" hgap="10" vgap="10"
-          xmlns="http://javafx.com/javafx/8.0.112" fx:controller="GUI.MainViewmodel">
+<?import java.net.URL?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" style="-fx-background-color: #EAEAeA;" xmlns="http://javafx.com/javafx/8.0.112"
+            fx:controller="GUI.MainViewmodel">
     <children>
 
-        <GridPane alignment="center" prefHeight="80.0" prefWidth="425.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <GridPane hgap="5" vgap="5">
             <children>
-                <FlowPane GridPane.columnIndex="0" GridPane.rowIndex="0">
+
+                <VBox styleClass="card" GridPane.rowIndex="0">
                     <children>
-                        <Button id="openButton" mnemonicParsing="false" onAction="#openFile" text="Open"/>
-                        <TextField fx:id="pathTextBox" minWidth="-Infinity" prefHeight="25.0" prefWidth="223.0"
-                                   promptText="Filepath"/>
+                        <GridPane alignment="center" hgap="10" prefHeight="80.0" prefWidth="425.0" vgap="10"
+                                  GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <children>
+                                <FlowPane hgap="10" vgap="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <children>
+                                        <Button id="openButton" mnemonicParsing="false" onAction="#openFile"
+                                                text="Open"/>
+                                        <TextField fx:id="pathTextBox" minWidth="-Infinity" prefHeight="36.0"
+                                                   prefWidth="300.0" promptText="Filepath"/>
+                                    </children>
+                                </FlowPane>
+
+                                <ComboBox fx:id="threadNumberComboBox" prefHeight="25.0" prefWidth="101.0"
+                                          promptText="Threads" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                <ComboBox fx:id="langComboBox" prefHeight="25.0" prefWidth="100.0" promptText="Language"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                <FlowPane hgap="10" vgap="10" GridPane.rowIndex="2">
+                                    <children>
+                                        <CheckBox fx:id="statisticToggleCheckBox" mnemonicParsing="false"
+                                                  text="Statistics"/>
+                                        <CheckBox fx:id="verboseToggleCheckBox" mnemonicParsing="false" text="Verbose"/>
+                                        <CheckBox fx:id="dbToggleCheckBox" mnemonicParsing="false" text="Database"/>
+                                    </children>
+                                </FlowPane>
+
+                                <Button mnemonicParsing="false" onAction="#runParser" text="Run!"
+                                        GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2"/>
+
+                                <FlowPane hgap="10" vgap="10" GridPane.rowIndex="1">
+                                    <CheckBox fx:id="maxToggleCheckBox" mnemonicParsing="false"
+                                              text=" Maximum pages to process: "/>
+                                    <TextField fx:id="maxTextBox" disable="#maxToggle" maxWidth="100" prefHeight="25.0"
+                                               prefWidth="99.0" promptText="Maximum"/>
+                                </FlowPane>
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints/>
+                                <ColumnConstraints/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints/>
+                                <RowConstraints/>
+                                <RowConstraints/>
+                            </rowConstraints>
+                        </GridPane>
                     </children>
-                </FlowPane>
+                </VBox>
 
-                <ComboBox fx:id="threadNumberComboBox" prefHeight="25.0" prefWidth="101.0" promptText="Threads"
-                          GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <VBox fx:id="dataBaseVBox" styleClass="card" GridPane.rowIndex="1">
+                    <children>
+                        <FlowPane vgap="10" hgap="10">
+                            <children>
+                                <Button id="openButton" mnemonicParsing="false" text="Open"/>
+                                <TextField promptText="URL" prefWidth="300.0"/>
+                                <Label text="Online"/>
+                            </children>
+                        </FlowPane>
 
-                <ComboBox fx:id="langComboBox" promptText="Language" prefHeight="25.0" prefWidth="100.0"
-                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <FlowPane vgap="10" hgap="10">
+                            <children>
+                                <CheckBox></CheckBox>
+                                <TextField promptText="user"/>
+                                <PasswordField promptText="password"/>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
 
-                <CheckBox mnemonicParsing="false" text="Verbose" GridPane.rowIndex="2"/>
+                <VBox styleClass="card" GridPane.rowIndex="2">
+                    <children>
+                        <TextArea fx:id="consoleTextArea" editable="false" prefHeight="217.0" prefWidth="465.0"
+                                  GridPane.rowIndex="1"/>
+                    </children>
+                </VBox>
 
-                <CheckBox mnemonicParsing="false" text="Statistics" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <VBox styleClass="card" GridPane.rowIndex="3">
+                    <children>
+                        <FlowPane prefHeight="25.0" prefWidth="481.0" GridPane.columnIndex="0"
+                                  GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                            <ProgressBar fx:id="progressBar" prefHeight="21.0" prefWidth="500.0" progress="0.0"
+                                         styleClass="progress-bar"/>
+                        </FlowPane>
+                    </children>
+                </VBox>
 
-                <FlowPane GridPane.rowIndex="1">
-                    <CheckBox mnemonicParsing="false" text="Maximum pages to process:"/>
-                    <TextField fx:id="maxTextBox" maxWidth="100" prefHeight="25.0" prefWidth="99.0"
-                               promptText="Maximum"/>
-                </FlowPane>
             </children>
+            <columnConstraints>
+                <ColumnConstraints/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints/>
+                <RowConstraints/>
+                <RowConstraints/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+            </rowConstraints>
         </GridPane>
 
-
-        <TextArea fx:id="consoleTextArea" editable="false" prefHeight="217.0" prefWidth="465.0" GridPane.rowIndex="1"/>
-
-        <FlowPane prefHeight="25.0" prefWidth="481.0" GridPane.columnIndex="0" GridPane.halignment="CENTER"
-                  GridPane.rowIndex="2">
-            <ProgressBar fx:id="progressBar" prefHeight="18.0" prefWidth="444.0" progress="0.0"/>
-            <Button mnemonicParsing="false" onAction="#runParser" text="Run" GridPane.columnIndex="2"
-                    GridPane.rowIndex="2"/>
-        </FlowPane>
     </children>
-</GridPane>
+    <stylesheets>
+        <URL value="@../Theme/material-fx-v0_3.css"/>
+        <URL value="@../Theme/materialfx-toggleswitch.css"/>
+    </stylesheets>
+</AnchorPane>
