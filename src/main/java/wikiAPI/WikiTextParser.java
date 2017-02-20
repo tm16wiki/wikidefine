@@ -6,19 +6,27 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * WikiTextParser parses and converts the text to a well formed definition
+ */
 public class WikiTextParser {
 
-
+    /**
+     * Takes a long definition string and converts to a string with a given max-sentences number
+     *
+     * @param str Input definition string
+     * @return shortened definition string
+     */
     private static String shortenDefinition(String str) {
         str = str.replaceAll("\\s+", " "); // remove multiple whitespaces
         String finalstr = "";
         int sentences = 0;
+        int maxsentences = 2; // number of output sentences
         int brackets = 0;
         String[] segs = str.split(Pattern.quote("."));
         String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
 
-        while (sentences < 2) {
+        while (sentences < maxsentences) {
             for (int i = 0; i < segs.length; i++) {
                 if (segs[i].contains("(")) {
                     brackets++;
@@ -27,11 +35,11 @@ public class WikiTextParser {
                     brackets--;
                 }
                 // TODO: Catch IndexOutOfBounds Exception
-                if (i < segs.length && i > 0 && segs[i - 1].length() > 5 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
+                if (i > 1 && segs[i - 1].length() > 2 && segs[i - 2].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ") && segs[i - 2].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
                     // pruefe ob aktueller chunk neuer satz ist
                     if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
-                            //&& segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
-                            && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+") // direkt vor Punkt steht keine Zahl
+                            && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
+                            && !(segs[i - 1].substring(segs[i - 1].lastIndexOf(" ", segs[i - 1].lastIndexOf(" "))).matches("[a-z]") && segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+")) // wenn vor Punkt Zahl und vor Zahl kleingeschrieben kein Satzende
                             && !segs[i - 1].substring(segs[i - 1].length() - 2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
                             && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
                             && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" " + consonants + "+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
@@ -41,7 +49,7 @@ public class WikiTextParser {
                         if (segs[i].substring(1, 2).matches("[=]") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
                             break;
                         }
-                        if (sentences < 2) {
+                        if (sentences < maxsentences) {
                             finalstr += segs[i] + ".";
                         } else {
                             break; // Gewuenschte Anzahl Saetze gefunden
@@ -58,11 +66,11 @@ public class WikiTextParser {
         if (finalstr.length() > 3 && finalstr.substring(finalstr.length() - 3).matches(". .")) {
             finalstr = finalstr.substring(0, finalstr.length() - 2);
         }
-        return finalstr;
+        return finalstr.trim();
     }
 
     /**
-     * unescapes html and wikipedia escapes in article
+     * Unescapes html and wikipedia escapes in article
      *
      * @param text article text to unescape
      * @return cleaned text as string
@@ -141,6 +149,7 @@ public class WikiTextParser {
         extract = StringUtils.replace(extract, "<br />", "");
         extract = StringUtils.replace(extract, "<nowiki />", "");
         extract = StringUtils.replace(extract, "<references />", "");
+        extract = StringUtils.replace(extract, "<onlyinclude>", "");
 
         try {
             //remove all [[ ]] tags
@@ -197,6 +206,12 @@ public class WikiTextParser {
         return extract;
     }
 
+    /**
+     * Extracts filenames from wikipedia tags
+     *
+     * @param text Input wikipedia string with wikipedia file tags
+     * @return all file URIs found
+     */
     public ArrayList<String> findFiles(String text) {
         ArrayList<String> files = new ArrayList<>();
         String pattern = "(?:\\[\\[)Datei:(.*)(?:\\]\\])";
@@ -214,7 +229,12 @@ public class WikiTextParser {
         return files;
     }
 
-
+    /**
+     * Returns links to articles found in wikipedia definition string
+     *
+     * @param text Input wikipedia definition string
+     * @return all article URIs found
+     */
     public ArrayList<String> findArticles(String text) {
         ArrayList<String> articles = new ArrayList<>();
         //Regex für artikel [[ ... ]] ('[' und ']’ ausgeschlossen falls verschachtelt)
@@ -240,7 +260,12 @@ public class WikiTextParser {
         return articles;
     }
 
-
+    /**
+     * Returns links to categories found in wikipedia definitions
+     *
+     * @param text Input wikipedia definition string
+     * @return all category URIs found
+     */
     public ArrayList<String> findCategories(String text) {
         ArrayList<String> categories = new ArrayList<>();
         String pattern = "(?:\\[\\[)(?:Kategorie:)([^\\[\\]]*)(?:\\]\\])";
@@ -253,7 +278,12 @@ public class WikiTextParser {
         return categories;
     }
 
-
+    /**
+     * Returns links to weblinks found in wikipedia definitions
+     *
+     * @param text Input wikipedia definition string
+     * @return all weblinks URIs found
+     */
     public ArrayList<String> findWeblinks(String text) {
         ArrayList<String> weblinks = new ArrayList<>();
         String pattern = "&lt;ref([^\\[]*)&gt;\\[([\\S]*) ([^\\]]*)\\]([^/]*)&lt;/ref&gt;";
@@ -266,7 +296,12 @@ public class WikiTextParser {
         return weblinks;
     }
 
-
+    /**
+     * Returns links to wikiobjects found in wikipedia definitions
+     *
+     * @param text Input wikipedia definition string
+     * @return all wikiobject URIs found
+     */
     public ArrayList<String> findWikiObject(String text) {
         ArrayList<String> objects = new ArrayList<>();
         //todo infoboxen und {| class... |} zu csv?
@@ -283,7 +318,12 @@ public class WikiTextParser {
         return objects;
     }
 
-
+    /**
+     * Checks if the definition string contains a polysemous
+     *
+     * @param text Input wikipedia definition string
+     * @return true if polysemous was found
+     */
     public boolean isPolysemous(String text) {
         return text.contains("{{Begriffsklärungshinweis}}");
     }
