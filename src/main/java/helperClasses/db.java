@@ -6,14 +6,14 @@ import java.io.InputStreamReader;
 import java.sql.*;
 
 /**
- * class to manage db connection independent of the type of the db
+ * Class to manage db connection independent of the type of the db
  */
 public class db {
     private Connection c;
     private String path;
 
     /**
-     * constructor for sqlite
+     * Constructor for sqlite
      *
      * @param db path to sqlite db
      */
@@ -39,9 +39,9 @@ public class db {
     }
 
     /**
-     * constructor for postgresql and mysql
+     * Constructor for postgresql and mysql
      *
-     * @param db   path to db
+     * @param db path to db
      * @param user username for db
      * @param pass password for db
      */
@@ -83,10 +83,10 @@ public class db {
     }
 
     /**
-     * runs query on db returns resultset
+     * Runs query on db
      *
      * @param query querystring to execute
-     * @return returns result of the query as resultset
+     * @return result of the query as resultset
      */
     public ResultSet execQuery(String query) {
         Statement stmt;
@@ -109,10 +109,10 @@ public class db {
 
 
     /**
-     * inserts definition into db
+     * Inserts definition into db
      *
-     * @param id
-     * @param title      of the article
+     * @param id database column ID of the entry
+     * @param title title of the article
      * @param definition generated definition
      * @return returns boolean
      */
@@ -125,15 +125,15 @@ public class db {
     }
 
     /**
-     * inserts configuration into db
+     * Inserts configuration into db
      *
-     * @param name       name of the configuration
-     * @param lang       language
-     * @param filepath   path of the file to process
-     * @param dbpath     location of the export db
-     * @param dbuser     db user
+     * @param name name of the configuration
+     * @param lang language
+     * @param filepath path of the file to process
+     * @param dbpath location of the export db
+     * @param dbuser db user
      * @param dbpassword db password
-     * @return returns boolean
+     * @return true if succeed
      */
     public boolean insertConfiguration(String name, String lang, String filepath, String dbpath, String dbuser, String dbpassword) {
         try {
@@ -153,10 +153,10 @@ public class db {
     }
 
     /**
-     * runs sql script
+     * Runs SQL script
      *
      * @param filepath location of the sql script
-     * @return returns boolean
+     * @return true if succeed
      */
     private boolean executeDBScript(String filepath) {
         boolean isScriptExecuted = false;
@@ -177,5 +177,4 @@ public class db {
         }
         return isScriptExecuted;
     }
-
 }

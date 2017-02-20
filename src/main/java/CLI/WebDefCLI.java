@@ -9,7 +9,7 @@ import helperClasses.xml;
 import wikiAPI.WikiTextParser;
 
 /**
- * cli for debuging by testing helperclasses and wikiAPI by getting definitions oder article info from the web
+ * CLI for the definition web-crawler
  */
 public class WebDefCLI implements ShellDependent {
     private static Config config;
@@ -19,9 +19,8 @@ public class WebDefCLI implements ShellDependent {
     private helperClasses.xml xml = new xml();
     private helperClasses.https https = new https();
 
-
     /**
-     * constructor for the cli
+     * Creates the web definition subshell
      *
      * @param config configuration to load
      */
@@ -31,9 +30,8 @@ public class WebDefCLI implements ShellDependent {
         System.out.println("language is set to: " + CLI.Config.getLang());
     }
 
-
     /**
-     * setter for the shell
+     * Setter for the shell
      *
      * @param theShell shell to set
      */
@@ -43,7 +41,7 @@ public class WebDefCLI implements ShellDependent {
 
 
     /**
-     * prints all definition of a term by mining a wikipedia article from web
+     * Prints the well-formed definition of a term by mining a wikipedia article from web
      *
      * @param term name of the article
      */
@@ -52,7 +50,6 @@ public class WebDefCLI implements ShellDependent {
             description = "creates definitions out of web")
     public void webdef(@Param(name = "term", description = "define this term") String term) {
         term = term.replaceAll(" ", "_");
-
         String url;
         switch (CLI.Config.getLang()) {
             case "de":
@@ -73,7 +70,7 @@ public class WebDefCLI implements ShellDependent {
     }
 
     /**
-     * prints all infos about a wikipedia article from web
+     * Prints all info crawled from a wikipedia article from web
      *
      * @param term name of the article
      */
@@ -122,7 +119,7 @@ public class WebDefCLI implements ShellDependent {
     }
 
     /**
-     * setter method for language
+     * Setter method for language
      *
      * @param lang language to set
      */
@@ -132,5 +129,4 @@ public class WebDefCLI implements ShellDependent {
     public void setLang(@Param(name = "language", description = "new lang value") String lang) {
         CLI.Config.setLang(lang);
     }
-
 }

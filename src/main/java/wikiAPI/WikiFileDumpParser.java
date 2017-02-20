@@ -3,6 +3,7 @@ package wikiAPI;
 import helperClasses.LangFilter;
 import helperClasses.xml;
 import javafx.concurrent.Task;
+import javafx.embed.swing.JFXPanel;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,10 +13,9 @@ import java.util.Objects;
 import static java.lang.StrictMath.round;
 
 /**
- * class for processing wikipedia xml dump as file
+ * Class for processing wikipedia xml dump as file
  */
 public class WikiFileDumpParser extends Task implements Runnable {
-
     public Thread[] threads;
     private int pages = 0;
     private int prefiltered = 0;
@@ -31,17 +31,16 @@ public class WikiFileDumpParser extends Task implements Runnable {
     private helperClasses.db db;
 
     /**
-     * constructor for setting up parameter, spawn and run processthreads and wait for them
+     * Constructor for setting up parameter, spawn and run process threads and wait for them
      *
      * @param threadcount number of threads to spawn
-     * @param maximum     maximum of pages to process
-     * @param printstats  boolean print statistics
-     * @param verbose     boolean verbose
-     * @param path        path to file
-     * @param db          database to store
+     * @param maximum maximum of pages to process
+     * @param printstats boolean print statistics
+     * @param verbose boolean verbose
+     * @param path path to file
+     * @param db database to store
      */
     public WikiFileDumpParser(int threadcount, int maximum, boolean printstats, boolean verbose, String path, helperClasses.db db) {
-
         if (threadcount > Runtime.getRuntime().availableProcessors()) {
             this.threads = new Thread[Runtime.getRuntime().availableProcessors()];
         } else
@@ -51,14 +50,13 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.verbose = verbose;
         this.path = path;
         this.db = db;
-
+        JFXPanel dummy = new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
     }
 
-
     /**
-     * prints results and time needed
+     * Prints results and time needed
      *
-     * @param starttime starttime
+     * @param starttime starting time
      */
     private void generateStatistics(long starttime) {
         //calculate time needed
@@ -71,6 +69,11 @@ public class WikiFileDumpParser extends Task implements Runnable {
         );
     }
 
+    /**
+     * Calls the threads to read the XML file
+     * @return Chunks
+     * @throws Exception File not found exception
+     */
     @Override
     protected Object call() throws Exception {
         try {
@@ -83,7 +86,6 @@ public class WikiFileDumpParser extends Task implements Runnable {
                 threads[i] = new fileThread(new RandomAccessFile(path, "r"), i);
                 threads[i].start();
             }
-
 
             synchronized (Objects.requireNonNull(threads)) {
                 if (max == Integer.MAX_VALUE) {
@@ -112,6 +114,9 @@ public class WikiFileDumpParser extends Task implements Runnable {
         return null;
     }
 
+    /**
+     * Starts to call the threads
+     */
     @Override
     public void run() {
         try {
@@ -121,15 +126,17 @@ public class WikiFileDumpParser extends Task implements Runnable {
         }
     }
 
-
+    /**
+     * Threads for XML processing
+     */
     private class fileThread extends Thread {
         private int id;
         private RandomAccessFile file;
 
         /**
-         * constructor for processing thread
+         * Constructor for processing thread
          *
-         * @param file     file to process
+         * @param file file to process
          * @param threadid id of the thread
          */
         fileThread(RandomAccessFile file, int threadid) {
@@ -137,9 +144,8 @@ public class WikiFileDumpParser extends Task implements Runnable {
             this.file = file;
         }
 
-
         /**
-         * processes filechunk generates definition and stores it to db
+         * Processes filechunk generates definition and stores it to db
          */
         @Override
         public synchronized void run() {
@@ -203,7 +209,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
 
 
         /**
-         * reads next line from cursor and converts it to UTF-8
+         * Reads next line from cursor and converts it to UTF-8
          *
          * @return next line as string
          */
@@ -236,7 +242,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
         }
 
         /**
-         * checks if definition has the right length
+         * Checks if definition has the right length
          *
          * @param definition definition
          * @return returns true if the definition is valid and false if it isn't

@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+/**
+ * GUI for wikidefine
+ */
 public class MainViewmodel {
     @FXML
     AnchorPane mainAnchorPane;
@@ -57,6 +60,9 @@ public class MainViewmodel {
     private StringProperty path = new SimpleStringProperty();
     private IntegerProperty max = new SimpleIntegerProperty(Integer.MAX_VALUE);
 
+    /**
+     * Initializes the wikidefine GUI
+     */
     public void initialize(){
         pathTextBox.textProperty().bindBidirectional(path);
         maxTextBox.textProperty().bindBidirectional(max, new NumberStringConverter());
@@ -70,9 +76,6 @@ public class MainViewmodel {
         dataBaseVBox.managedProperty().bindBidirectional(dbToggle);
 
         runButton.setGraphic( new ImageView( new Image(this.getClass().getResourceAsStream("/Theme/RunButton.png") )));
-
-
-
 
         threadNumberComboBox.getItems().addAll(
                 "1", "2", "3", "4", "5", "6", "7", "8"
@@ -88,8 +91,10 @@ public class MainViewmodel {
         System.setErr(ps);
     }
 
-
-
+    /**
+     * Shows file dialog to choose the Wikipedia XML file
+     * @param event not used
+     */
     @FXML
     private void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -101,6 +106,10 @@ public class MainViewmodel {
         path.setValue( file.getAbsolutePath());
     }
 
+    /**
+     * Runs the text parser
+     * @param e not used
+     */
     @FXML
     private void runParser(ActionEvent e) {
         int threadcount = threadNumberComboBox.getSelectionModel().getSelectedIndex() + 1;
@@ -111,7 +120,9 @@ public class MainViewmodel {
         new Thread(copyWorker).start();
     }
 
-
+    /**
+     * Shows parser stats
+     */
     public static class Console extends OutputStream {
         private TextArea output;
 

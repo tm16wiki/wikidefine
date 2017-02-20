@@ -14,18 +14,22 @@ import java.util.Scanner;
 
 public class ConfigCLI {
     private static Shell shell;
-
     private db localdb;
     private Config config;
 
-
+    /**
+     * Loads CLI configuration and shell
+     */
     public ConfigCLI() {
         String sqlitepath = Paths.get(".").toAbsolutePath().normalize().toString() + "/config.db";
         localdb = new db(sqlitepath);
         loadconfig("default");
+        this.shell = ShellFactory.createConsoleShell("cli", "cli", "cli"); // dummy shell
     }
 
-
+    /**
+     * Enters web definition subshell
+     */
     @Command(name = "webdef",
             abbrev = "wd",
             description = "creates definitions out of web")
@@ -38,6 +42,9 @@ public class ConfigCLI {
         }
     }
 
+    /**
+     * Enters file dump subshell
+     */
     @Command(name = "filedump",
             abbrev = "fd",
             description = "creates all definitions out of file with max speed")
@@ -50,7 +57,10 @@ public class ConfigCLI {
         }
     }
 
-
+    /**
+     * Loads CLI configuration
+     * @param name CLI configuration to load
+     */
     @Command(name = "loadconfig",
             abbrev = "lc",
             description = "load configuration")
@@ -78,7 +88,10 @@ public class ConfigCLI {
         }
     }
 
-
+    /**
+     * Deletes CLI configuration
+     * @param name CLI configuration to delete
+     */
     @Command(name = "deleteconfig",
             abbrev = "dc",
             description = "delete configuration")
@@ -86,7 +99,9 @@ public class ConfigCLI {
         localdb.execQuery("delete from config where name='" + name + "';");
     }
 
-
+    /**
+     * Creates a new CLI configuration
+     */
     @Command(name = "newconfig",
             abbrev = "nc",
             description = "new configuration")
@@ -121,6 +136,9 @@ public class ConfigCLI {
         }
     }
 
+    /**
+     * Lists all available CLI configurations
+     */
     @Command(name = "listconfig",
             abbrev = "ls",
             description = "list configuration")

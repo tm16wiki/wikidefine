@@ -9,7 +9,7 @@ import wikiAPI.WikiFileDumpParser;
 
 
 /**
- * class to controll the fildumpparser by cli
+ * Class to control the fildump parser by CLI
  */
 public class FileDumpCLI implements ShellDependent {
     private Shell theShell;
@@ -22,11 +22,10 @@ public class FileDumpCLI implements ShellDependent {
     private String dbpath;
     private db exportDB;
 
-
     /**
-     * constructor
+     * Constructor for the file dump operation
      *
-     * @param config configuration to load
+     * @param config CLI configuration to load
      */
     FileDumpCLI(Config config) {
         this.filepath = CLI.Config.getFilepath();
@@ -39,7 +38,7 @@ public class FileDumpCLI implements ShellDependent {
 
 
     /**
-     * prints current configuration
+     * Prints current configuration
      */
     @Command(name = "config",
             abbrev = "c",
@@ -56,7 +55,7 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * starts filedump processing
+     * Starts filedump processing
      */
     @Command(name = "run",
             abbrev = "r",
@@ -75,7 +74,7 @@ public class FileDumpCLI implements ShellDependent {
 
 
     /**
-     * setter for the shell
+     * Setter for the shell
      *
      * @param theShell shell to set
      */
@@ -84,7 +83,7 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * changes the value of verbose
+     * Changes the value of verbose
      */
     @Command(name = "switchverbose",
             abbrev = "sv",
@@ -95,7 +94,7 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * changes the value of export
+     * Changes the value of export
      */
     @Command(name = "switchexport",
             abbrev = "se",
@@ -106,7 +105,7 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * changes the value of stats
+     * Changes the value of stats
      */
     @Command(name = "switchstats",
             abbrev = "ss",
@@ -117,7 +116,7 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * sets the vaulue for the maximum
+     * Sets the value for the maximum entries to create definitions for
      *
      * @param max maximmum to set
      */
@@ -130,9 +129,9 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * changes the filepath of the xml dump
+     * Changes the filepath to the Wikipedia XML dump
      *
-     * @param filepath path to file
+     * @param filepath path to Wikipedia XML dump
      */
     @Command(name = "setpath",
             abbrev = "sp",
@@ -143,9 +142,9 @@ public class FileDumpCLI implements ShellDependent {
     }
 
     /**
-     * changes the amount of threads to spawn
+     * Changes the amount of threads to open
      *
-     * @param threads amount of threads to spawn
+     * @param threads amount of threads to open
      */
     @Command(name = "setthreads",
             abbrev = "st",
@@ -154,5 +153,4 @@ public class FileDumpCLI implements ShellDependent {
         this.threads = threads;
         showconfig();
     }
-
 }

@@ -21,11 +21,10 @@ public class https {
     private String URL;
     private Date timestamp;
 
-
     /**
-     * creates connection to given url
+     * Creates connection to given URL
      *
-     * @param https_url url to connect
+     * @param https_url URL to connect
      * @return true if successful or false if not
      */
     public boolean loadURL(String https_url) {
@@ -51,7 +50,7 @@ public class https {
 
 
     /**
-     * loads certificates from given connetion
+     * Loads certificates from given connection
      *
      * @param con connection to load from
      */
@@ -73,7 +72,7 @@ public class https {
     }
 
     /**
-     * loads content from given https connection
+     * Loads content from given https connection
      *
      * @param con httpsURLConnection
      */
@@ -93,43 +92,43 @@ public class https {
     }
 
     /**
-     * getter method for the content
+     * Getter method for the content
      *
-     * @return returns contentstring
+     * @return returns content as string
      */
     public String getContent() {
         return content;
     }
 
     /**
-     * getter method for the certificate information
+     * Getter method for the certificate information
      *
-     * @return returns certificatestring
+     * @return returns certificate string
      */
     public String getCertInfo() {
         return certInfo;
     }
 
     /**
-     * getter method for the url
+     * Getter method for the URL
      *
-     * @return returns url
+     * @return URL
      */
     public String getURL() {
         return URL;
     }
 
     /**
-     * getter method for the timestamp
+     * Getter method for the timestamp
      *
-     * @return returns timestamp
+     * @return timestamp
      */
     public Date getTimestamp() {
         return timestamp;
     }
 
     /**
-     * getter method for the https certificates
+     * Getter method for the https certificates
      *
      * @return array of certificates
      */
