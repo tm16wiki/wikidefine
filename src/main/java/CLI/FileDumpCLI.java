@@ -136,7 +136,7 @@ public class FileDumpCLI implements ShellDependent {
     @Command(name = "setpath",
             abbrev = "sp",
             description = "stets filepath")
-    public void setPath(@Param(name = "path", description = "filepath") String filepath) {
+    public void setPath(@Param(name = "path", description = "path to wikipedia XML dump") String filepath) {
         this.filepath = filepath;
         showconfig();
     }
