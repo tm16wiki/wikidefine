@@ -41,7 +41,7 @@ public class db {
     /**
      * Constructor for postgresql and mysql
      *
-     * @param db path to db
+     * @param db   path to db
      * @param user username for db
      * @param pass password for db
      */
@@ -52,6 +52,7 @@ public class db {
             try {
                 System.out.print("connecting to postgresqlDB ... ");
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
+                c.setAutoCommit(false);
                 Class.forName("org.postgresql.Driver");
                 System.out.printf("connected!\n");
                 //setup table
@@ -111,11 +112,13 @@ public class db {
     /**
      * Inserts definition into db
      *
-     * @param id database column ID of the entry
-     * @param title title of the article
+     * @param id         database column ID of the entry
+     * @param title      title of the article
      * @param definition generated definition
      * @return returns boolean
      */
+
+    //TODO: batch inserts for performance!!!
     public void insertDefinition(int id, String title, String definition) {
         try {
             execQuery("insert into definition( id, title, text) values('" + id + "', '" + title + "', '" + definition + "');");
@@ -124,14 +127,15 @@ public class db {
         }
     }
 
+
     /**
      * Inserts configuration into db
      *
-     * @param name name of the configuration
-     * @param lang language
-     * @param filepath path of the file to process
-     * @param dbpath location of the export db
-     * @param dbuser db user
+     * @param name       name of the configuration
+     * @param lang       language
+     * @param filepath   path of the file to process
+     * @param dbpath     location of the export db
+     * @param dbuser     db user
      * @param dbpassword db password
      * @return true if succeed
      */

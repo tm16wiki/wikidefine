@@ -9,8 +9,9 @@ public class LangFilter {
 
     /**
      * Checks if input string contains Wikipedia tags in given language
+     *
      * @param lang Language to check
-     * @param str Input wikipedia string
+     * @param str  Input wikipedia string
      * @return true if input string contains tags in given language
      */
     public static boolean check(String lang, String str) {
@@ -25,6 +26,7 @@ public class LangFilter {
 
     /**
      * Checks if input string contains Wikipedia tags in english language
+     *
      * @param str Input wikipedia string
      * @return true if input string contains tags in english language
      */
@@ -35,8 +37,10 @@ public class LangFilter {
     }
 
     //TODO: implement other lang
+
     /**
      * Checks if input string contains Wikipedia tags in russian language
+     *
      * @param str Input wikipedia string
      * @return true if input string contains tags in russian language
      */
@@ -46,6 +50,7 @@ public class LangFilter {
 
     /**
      * Checks if input string contains Wikipedia tags in german language
+     *
      * @param str Input wikipedia string
      * @return true if input string contains tags in german language
      */

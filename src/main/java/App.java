@@ -14,10 +14,11 @@ public class App extends Application {
 
     /**
      * Starting method
+     *
      * @param args
      */
     public static void main(String[] args) {
-        if(args.length>0 && args[0].contains("gui")){
+        if (args.length > 0 && args[0].contains("gui")) {
             launch(); // launch GUI
         } else { // launch shell
             Shell shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new ConfigCLI());
@@ -37,6 +38,7 @@ public class App extends Application {
 
     /**
      * Starts the GUI
+     *
      * @param primaryStage Window
      * @throws Exception FXML Exception
      */
@@ -49,10 +51,10 @@ public class App extends Application {
         primaryStage.sizeToScene();
         primaryStage.getIcons().add(
                 new javafx.scene.image.Image(
-                        App.class.getResourceAsStream( "/Theme/WikiDefineIcon.png" ))
+                        App.class.getResourceAsStream("/Theme/WikiDefineIcon.png"))
         );
 
-        App.class.getResource( "/Theme/WikiDefineIcon.png" );
+        App.class.getResource("/Theme/WikiDefineIcon.png");
         primaryStage.show();
     }
 }

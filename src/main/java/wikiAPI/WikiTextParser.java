@@ -171,7 +171,7 @@ public class WikiTextParser {
             //remove all {{ }} tags
             //remove wikipediaobjects
             //4 level deep e.g. infoboxes
-            //todo: z.b. Talk (Mineral)
+            //TODO: z.b. Talk (Mineral)
             for (int i = 0; i < 3; i++) {
                 r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
                 m = r.matcher(extract);

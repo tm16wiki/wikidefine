@@ -18,10 +18,10 @@ public class Config {
     /**
      * Creates a new CLI configuration
      *
-     * @param lang Language to use for webdefinition
-     * @param filepath Path to Wikipedia XML dump for filedump
-     * @param dbpath Path to database postgre/mysql/sqlite
-     * @param dbuser Database user
+     * @param lang       Language to use for webdefinition
+     * @param filepath   Path to Wikipedia XML dump for filedump
+     * @param dbpath     Path to database postgre/mysql/sqlite
+     * @param dbuser     Database user
      * @param dbpasswort Database password
      */
     Config(String lang, String filepath, String dbpath, String dbuser, String dbpasswort) {
@@ -42,6 +42,7 @@ public class Config {
 
     /**
      * Returns the configuration language
+     *
      * @return configuration language
      */
     public static String getLang() {
@@ -50,6 +51,7 @@ public class Config {
 
     /**
      * Sets the configuration language
+     *
      * @param lang configuration language
      */
     static void setLang(String lang) {
@@ -58,6 +60,7 @@ public class Config {
 
     /**
      * Gets the file path to Wikipedia dump XML
+     *
      * @return file path to Wikipedia dump XML
      */
     public static String getFilepath() {
@@ -66,6 +69,7 @@ public class Config {
 
     /**
      * Sets the file path to Wikipedia dump XML
+     *
      * @param filepath file path to Wikipedia dump XML
      */
     static void setFilepath(String filepath) {
@@ -74,6 +78,7 @@ public class Config {
 
     /**
      * Gets the database path to save the short definitions
+     *
      * @return database path
      */
     static String getDbpath() {
@@ -82,6 +87,7 @@ public class Config {
 
     /**
      * Sets the database path to save the short definitions
+     *
      * @param dbpath database path
      */
     static void setDbpath(String dbpath) {
@@ -90,6 +96,7 @@ public class Config {
 
     /**
      * Gets the database to save the short definitions
+     *
      * @return database object
      */
     static db getDatabase() {
@@ -98,6 +105,7 @@ public class Config {
 
     /**
      * Sets the database to save the short definitions
+     *
      * @param database database object
      */
     public static void setDatabase(db database) {
@@ -106,6 +114,7 @@ public class Config {
 
     /**
      * Gets the database user
+     *
      * @return database user
      */
     public static String getDbuser() {
@@ -114,6 +123,7 @@ public class Config {
 
     /**
      * Sets the database user
+     *
      * @param dbuser database user
      */
     public static void setDbuser(String dbuser) {
@@ -122,6 +132,7 @@ public class Config {
 
     /**
      * Gets the database password
+     *
      * @return database password
      */
     public static String getDbpassword() {
@@ -130,6 +141,7 @@ public class Config {
 
     /**
      * Sets the database password
+     *
      * @param dbpassword database password
      */
     public static void setDbpassword(String dbpassword) {

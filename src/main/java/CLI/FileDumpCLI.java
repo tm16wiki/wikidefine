@@ -68,7 +68,7 @@ public class FileDumpCLI implements ShellDependent {
             task = new Thread(new WikiFileDumpParser(threads, max, stats, verbose, filepath, exportDB));
         }
         task.start();
-        while (task.isAlive()){
+        while (task.isAlive()) {
         }
     }
 
