@@ -6,7 +6,6 @@ import asg.cliche.Shell;
 import asg.cliche.ShellFactory;
 import helperClasses.db;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
@@ -59,6 +58,7 @@ public class ConfigCLI {
 
     /**
      * Loads CLI configuration
+     *
      * @param name CLI configuration to load
      */
     @Command(name = "loadconfig",
@@ -90,6 +90,7 @@ public class ConfigCLI {
 
     /**
      * Deletes CLI configuration
+     *
      * @param name CLI configuration to delete
      */
     @Command(name = "deleteconfig",

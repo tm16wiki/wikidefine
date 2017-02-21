@@ -29,7 +29,7 @@ public class xml {
     /**
      * Extracts tag out of an xml
      *
-     * @param xml the xml as string
+     * @param xml     the xml as string
      * @param tagName the name of the tag to extract
      * @return tag content as string
      */
@@ -69,7 +69,7 @@ public class xml {
      */
     public String getChecksum(String xml) {
         try {
-            //TODO sha1 from _...?
+            //todo sha1 from _...?
             //System.out.println(sha1(xml));
             sha1(xml);
         } catch (NoSuchAlgorithmException e) {

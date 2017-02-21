@@ -1,5 +1,6 @@
 package GUI;
 
+import helperClasses.db;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.concurrent.Task;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Paths;
+import java.sql.ResultSet;
 
 /**
  * GUI for wikidefine
@@ -50,32 +53,48 @@ public class MainViewmodel {
     CheckBox dbToggleCheckBox;
     @FXML
     VBox dataBaseVBox;
-
+    @FXML
+    CheckBox dbAuthCheckBox;
+    @FXML
+    TextField dbPathTextField;
+    @FXML
+    TextField dbUserTextField;
+    @FXML
+    PasswordField dbPasswordPasswordField;
     PrintStream ps;
-
+    db configDB;
     private BooleanProperty dbToggle = new SimpleBooleanProperty(false);
     private BooleanProperty verboseToggle = new SimpleBooleanProperty(false);
     private BooleanProperty statisticToggle = new SimpleBooleanProperty(true);
-    private BooleanProperty maxToggle = new SimpleBooleanProperty(true);
-    private StringProperty path = new SimpleStringProperty();
+    private BooleanProperty maxToggle = new SimpleBooleanProperty(false);
+    private StringProperty filePath = new SimpleStringProperty();
     private IntegerProperty max = new SimpleIntegerProperty(Integer.MAX_VALUE);
+    private BooleanProperty dbAuthToggle = new SimpleBooleanProperty();
+    private StringProperty dbPath = new SimpleStringProperty();
+    private StringProperty dbUser = new SimpleStringProperty("");
+    private StringProperty dbPassword = new SimpleStringProperty("");
 
     /**
      * Initializes the wikidefine GUI
      */
-    public void initialize(){
-        pathTextBox.textProperty().bindBidirectional(path);
+    public void initialize() {
+        pathTextBox.textProperty().bindBidirectional(filePath);
         maxTextBox.textProperty().bindBidirectional(max, new NumberStringConverter());
         maxToggleCheckBox.selectedProperty().bindBidirectional(maxToggle);
-        maxTextBox.disableProperty().bindBidirectional(maxToggle);
+        maxTextBox.disableProperty().bind(maxToggle.not());
         statisticToggleCheckBox.selectedProperty().bindBidirectional(statisticToggle);
         verboseToggleCheckBox.selectedProperty().bindBidirectional(verboseToggle);
+
         dbToggleCheckBox.selectedProperty().bindBidirectional(dbToggle);
+        dataBaseVBox.disableProperty().bind(dbToggle.not());
+        dbPathTextField.textProperty().bindBidirectional(dbPath);
+        dbAuthCheckBox.selectedProperty().bindBidirectional(dbAuthToggle);
+        dbUserTextField.textProperty().bindBidirectional(dbUser);
+        dbUserTextField.disableProperty().bind(dbAuthToggle.not());
+        dbPasswordPasswordField.textProperty().bindBidirectional(dbPassword);
+        dbPasswordPasswordField.disableProperty().bind(dbAuthToggle.not());
 
-        dataBaseVBox.visibleProperty().bindBidirectional(dbToggle);
-        dataBaseVBox.managedProperty().bindBidirectional(dbToggle);
-
-        runButton.setGraphic( new ImageView( new Image(this.getClass().getResourceAsStream("/Theme/RunButton.png") )));
+        runButton.setGraphic(new ImageView(new Image(this.getClass().getResourceAsStream("/Theme/RunButton.png"))));
 
         threadNumberComboBox.getItems().addAll(
                 "1", "2", "3", "4", "5", "6", "7", "8"
@@ -89,10 +108,48 @@ public class MainViewmodel {
         ps = new PrintStream(console, true);
         System.setOut(ps);
         System.setErr(ps);
+
+
+        //loading default config
+        String sqlitepath = Paths.get(".").toAbsolutePath().normalize().toString() + "/config.db";
+        ResultSet rs = new db(sqlitepath).execQuery("select * from config where name = 'default';");
+        try {
+            while (rs.next()) {
+                //        rs.getString("language");
+                filePath.setValue(rs.getString("file"));
+                dbPath.setValue(rs.getString("exportdb"));
+                dbUser.setValue(rs.getString("dbuser"));
+                dbPassword.setValue(rs.getString("dbpassword"));
+            }
+            if (!dbUser.getValue().equals("null") && !dbPassword.getValue().equals("null")) {
+                dbAuthToggle.setValue(true);
+            } else {
+                dbUser.setValue(null);
+                dbPassword.setValue(null);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+
+
     }
+
+
+    @FXML
+    private void openDB(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(new Stage());
+        if (file != null) {
+            System.out.println("Open db:\t" + file.getAbsolutePath());
+
+        }
+        dbPath.setValue(file.getAbsolutePath());
+    }
+
 
     /**
      * Shows file dialog to choose the Wikipedia XML file
+     *
      * @param event not used
      */
     @FXML
@@ -100,21 +157,32 @@ public class MainViewmodel {
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(new Stage());
         if (file != null) {
-            System.out.println("Open file: " + file.getAbsolutePath());
+            System.out.println("Open file:\t" + file.getAbsolutePath());
 
         }
-        path.setValue( file.getAbsolutePath());
+        filePath.setValue(file.getAbsolutePath());
     }
 
     /**
      * Runs the text parser
+     *
      * @param e not used
      */
     @FXML
     private void runParser(ActionEvent e) {
         int threadcount = threadNumberComboBox.getSelectionModel().getSelectedIndex() + 1;
 
-        Task copyWorker = new WikiFileDumpParser(threadcount, max.getValue(), statisticToggle.getValue(), verboseToggle.getValue(), path.get(), null);
+        db db = null;
+        if (dbToggle.getValue()) {
+            if (dbUser.getValue() != null && dbPassword != null) {
+                db = new db(dbPath.getValue(), dbUser.getValue(), dbPassword.getValue());
+            } else {
+                db = new db(dbPath.getValue());
+            }
+        }
+
+
+        Task copyWorker = new WikiFileDumpParser(threadcount, max.getValue(), statisticToggle.getValue(), verboseToggle.getValue(), filePath.get(), db);
         progressBar.progressProperty().unbind();
         progressBar.progressProperty().bind(copyWorker.progressProperty());
         new Thread(copyWorker).start();

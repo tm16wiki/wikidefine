@@ -34,11 +34,11 @@ public class WikiFileDumpParser extends Task implements Runnable {
      * Constructor for setting up parameter, spawn and run process threads and wait for them
      *
      * @param threadcount number of threads to spawn
-     * @param maximum maximum of pages to process
-     * @param printstats boolean print statistics
-     * @param verbose boolean verbose
-     * @param path path to file
-     * @param db database to store
+     * @param maximum     maximum of pages to process
+     * @param printstats  boolean print statistics
+     * @param verbose     boolean verbose
+     * @param path        path to file
+     * @param db          database to store
      */
     public WikiFileDumpParser(int threadcount, int maximum, boolean printstats, boolean verbose, String path, helperClasses.db db) {
         if (threadcount > Runtime.getRuntime().availableProcessors()) {
@@ -71,6 +71,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
 
     /**
      * Calls the threads to read the XML file
+     *
      * @return Chunks
      * @throws Exception File not found exception
      */
@@ -136,7 +137,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
         /**
          * Constructor for processing thread
          *
-         * @param file file to process
+         * @param file     file to process
          * @param threadid id of the thread
          */
         fileThread(RandomAccessFile file, int threadid) {
