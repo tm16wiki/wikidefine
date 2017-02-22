@@ -31,7 +31,11 @@ public class LangFilter {
      * @return true if input string contains tags in english language
      */
     public static boolean checkEN(String str) {
-        if (StringUtils.containsAny(str, "#REDIRECT", "#Redirect", "#redirect")) {
+        if (StringUtils.containsAny(str,
+                "#REDIRECT",
+                "#Redirect",
+                "#redirect"
+        )) {
             return true;
         } else return false;
     }

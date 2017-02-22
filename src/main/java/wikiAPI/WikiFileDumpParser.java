@@ -40,6 +40,8 @@ public class WikiFileDumpParser extends Task implements Runnable {
      * @param path        path to file
      * @param db          database to store
      */
+
+    // TODO: Auto detect file dump language
     public WikiFileDumpParser(int threadcount, int maximum, boolean printstats, boolean verbose, String path, helperClasses.db db) {
         if (threadcount > Runtime.getRuntime().availableProcessors()) {
             this.threads = new Thread[Runtime.getRuntime().availableProcessors()];
@@ -50,7 +52,6 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.verbose = verbose;
         this.path = path;
         this.db = db;
-        JFXPanel dummy = new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
     }
 
     /**

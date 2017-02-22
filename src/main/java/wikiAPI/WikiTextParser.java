@@ -32,11 +32,12 @@ public class WikiTextParser {
                 if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
                         && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                         && !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
-                        && !(
-                            !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
-                         && segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).substring(segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).lastIndexOf(" ")+1).matches("^[a-z]")
-                         && segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+")
-                        ) // wenn vor Punkt Zahl und vor Zahl kleingeschrieben kein Satzende
+                        //TODO: Wenn vor Punkt eine Zahl vor der Zahl nur kleingeschriebenes Wort mit min. Länge von 3 Zeichen
+                        // && !(
+                        //    !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
+                        // && segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).substring(segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).lastIndexOf(" ")+1).matches("^[a-z]")
+                         && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+")
+                        //) // wenn vor Punkt Zahl und vor Zahl kleingeschrieben kein Satzende
                         && !segs[i - 1].substring(segs[i - 1].length() - 2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
                         && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
                         && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" " + consonants + "+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
@@ -78,8 +79,8 @@ public class WikiTextParser {
         String[] escapes;
         escapes = new String[]{
                 //html escape sequences
-                "&quot;", "&apos;", "&amp;", "&lt;", "&gt;", "&nbsp;", /*"&iexcl;", "&cent;", "&pound;", "&curren;",
-                "&yen;", "&brvbar;", "&sect;", "&uml;", "&copy;", "&ordf;", "&laquo;", "&not;", "&shy;", "&reg;",
+                "&quot;", "&apos;", "&amp;", "&lt;", "&gt;", "&nbsp;", "&shy;", /*"&iexcl;", "&cent;", "&pound;", "&curren;",
+                "&yen;", "&brvbar;", "&sect;", "&uml;", "&copy;", "&ordf;", "&laquo;", "&not;", "&reg;",
                 "&macr;", "&deg;", "&plusmn;", "&sup2;", "&sup3;", "&acute;", "&micro;", "&para;", "&middot;", "&cedil;",
                 "&sup1;", "&ordm;", "&raquo;", "&frac14;", "&frac12;", "&frac34;", "&iquest;", "&times;", "&divide;",
                 "&Agrave;", "&Aacute;", "&Acirc;", "&Atilde;", "&Auml;", "&Aring;", "&AElig;", "&Ccedil;", "&Egrave;",
@@ -93,7 +94,7 @@ public class WikiTextParser {
         };
         replacements = new String[]{
                 //html escape sequence replacements
-                "\"", "'", "&", "<", ">", " ", /*"¡", "¢", "£", "¤", "¥", "¦", "§", "¨", "©", "ª", "«", "¬", " ", "®",
+                "\"", "'", "&", "<", ">", " ", " ", /*"¡", "¢", "£", "¤", "¥", "¦", "§", "¨", "©", "ª", "«", "¬", "®",
                 "¯", "°", "±", "²", "³", "´", "µ", "¶", "·", "¸", "¹", "º", "»", "¼", "½", "¾", "¿", "×", "÷", "À", "Á",
                 "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö",
                 "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ", "ß", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì",
@@ -141,6 +142,11 @@ public class WikiTextParser {
         Matcher m;
 
         //remove all < > notated tags
+        // TODO: ref-Boxen der Art <ref name="..."/> (Aragosaurus)
+        // TODO: Leere Divs (CSU-Landesgruppe)
+        // TODO: Kommentar abgeschnitten !--> (Auge)
+        // TODO: [[Datei: (Manfred von Richthofen)
+        // TODO: Multiple " " (Phuwiangosaurus)
         extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
         extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
         extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?: \\/>)", "");
