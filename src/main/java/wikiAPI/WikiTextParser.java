@@ -52,7 +52,6 @@ public class WikiTextParser {
                         finalstr += newstr;
                         newstr = "";
                     } else {
-                        finalstr += newstr; // max sentences erreicht - fuege neuen satz zu final string hinzu
                         break; // Gewuenschte Anzahl Saetze gefunden
                     }
                 } else { // noch kein Satzende erreicht - weiter
@@ -62,8 +61,9 @@ public class WikiTextParser {
                 newstr += segs[i] + "."; // skippe aktuelles segment
             }
         }
-        if (finalstr.length() > 3 && finalstr.substring(finalstr.length() - 3).matches(". .")) {
-            finalstr = finalstr.substring(0, finalstr.length() - 2);
+        finalstr += newstr; // max sentences erreicht - fuege letzten satz zu final string hinzu
+        if (finalstr.length() > 2 && finalstr.substring(finalstr.length()-2, finalstr.length()).equals(" .")) {
+            finalstr = finalstr.substring(0, finalstr.length()-2);
         }
         return finalstr.trim();
     }
@@ -145,7 +145,6 @@ public class WikiTextParser {
         // TODO: ref-Boxen der Art <ref name="..."/> (Aragosaurus)
         // TODO: Leere Divs (CSU-Landesgruppe)
         // TODO: Kommentar abgeschnitten !--> (Auge)
-        // TODO: [[Datei: (Manfred von Richthofen)
         // TODO: Multiple " " (Phuwiangosaurus)
         extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
         extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
@@ -172,7 +171,9 @@ public class WikiTextParser {
                 }
             }
             //remove files, picture, categories and other
-            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:.*)(?:\\]\\])", "");
+            // TODO: while m.find() - vielleicht reichen auch schon zwei
+            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
+            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
 
             //remove all {{ }} tags
             //remove wikipediaobjects
