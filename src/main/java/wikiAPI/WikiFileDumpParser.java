@@ -52,6 +52,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.verbose = verbose;
         this.path = path;
         this.db = db;
+        new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
     }
 
     /**
@@ -174,6 +175,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                                 reject = true;
                                 break;
                                 //TODO: better condition
+
                             } else if (line.contains("==")) {
                                 break;
                             }
