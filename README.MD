@@ -59,12 +59,7 @@ After you finished your configuration you can run `fd` to start the filedump ext
 |Option|Description|Command|Default value|Example|
 |---	|---	|---	|---	|---	|
 |threads|Number of used threads.|st|4|st 4|
-|maximum|Maximum number of definitions to extract.|sm|Integer.MAX_VALUE|sm 5000|
-|filepath|Path to Wikipedia XML dump file|sp|filepath specified in main configuration|sp /home/user/wikidefine/dewikidump.xml|
-|db path|Path to database|Not changeable|database path specified in main configuration|Not changeable (please edit the main configuration)|
-|db export|Specifies whether or not the definitions are stored in the database.|se|true|se|
-|verbose|Displays accepted and rejected definitions when true|sv|true|sv|
-|show stats|Shows running time, number of prefiltered pages, number of accepted definitions and number of rejected definitions after completing.|ss|false|ss|
+
 
 When the configuration is ready please run `run` to start the extraction process.
 
