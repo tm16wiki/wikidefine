@@ -40,8 +40,6 @@ public class MainViewmodel {
     @FXML
     ComboBox threadNumberComboBox;
     @FXML
-    ComboBox langComboBox;
-    @FXML
     TextArea consoleTextArea;
     @FXML
     CheckBox maxToggleCheckBox;
@@ -63,6 +61,7 @@ public class MainViewmodel {
     PasswordField dbPasswordPasswordField;
     PrintStream ps;
     db configDB;
+
     private BooleanProperty dbToggle = new SimpleBooleanProperty(false);
     private BooleanProperty verboseToggle = new SimpleBooleanProperty(false);
     private BooleanProperty statisticToggle = new SimpleBooleanProperty(true);
@@ -100,9 +99,6 @@ public class MainViewmodel {
                 "1", "2", "3", "4", "5", "6", "7", "8"
         );
 
-        langComboBox.getItems().addAll(
-                "DE", "EN", "IT", "PL", "RU"
-        );
 
         Console console = new Console(consoleTextArea);
         ps = new PrintStream(console, true);

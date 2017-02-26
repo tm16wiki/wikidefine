@@ -8,6 +8,7 @@ import javafx.embed.swing.JFXPanel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.util.Objects;
 
 import static java.lang.StrictMath.round;
@@ -24,6 +25,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
     private long chunksize;
     private long filesize;
     private long progress;
+    private String lang;
     private int max;
     private boolean printstats = false;
     private boolean verbose = false;
@@ -41,7 +43,6 @@ public class WikiFileDumpParser extends Task implements Runnable {
      * @param db          database to store
      */
 
-    // TODO: Auto detect file dump language
     public WikiFileDumpParser(int threadcount, int maximum, boolean printstats, boolean verbose, String path, helperClasses.db db) {
         if (threadcount > Runtime.getRuntime().availableProcessors()) {
             this.threads = new Thread[Runtime.getRuntime().availableProcessors()];
@@ -53,6 +54,19 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.path = path;
         this.db = db;
         new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
+
+        //autodetect lang
+        try {
+            RandomAccessFile file = new RandomAccessFile(path, "r");
+            filesize = file.getChannel().size();
+            this.chunksize = filesize / threads.length;
+            //get first line
+            String line = file.readLine();
+            //cut xml:lang ..
+            this.lang = line.substring(line.indexOf("xml:lang=\""), line.lastIndexOf("\">"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -81,9 +95,6 @@ public class WikiFileDumpParser extends Task implements Runnable {
     protected Object call() throws Exception {
         try {
             long startTime = System.currentTimeMillis();
-
-            filesize = new RandomAccessFile(path, "r").getChannel().size();
-            this.chunksize = filesize / threads.length;
 
             for (int i = 0; i < threads.length; i++) {
                 threads[i] = new fileThread(new RandomAccessFile(path, "r"), i);
@@ -170,7 +181,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                         line = readLineUTF();
                         boolean reject = false;
                         while (!Objects.requireNonNull(line).contains("</page>")) {
-                            if (LangFilter.check("DE", line) || LangFilter.check("EN", line)) {
+                            if (LangFilter.check(lang, line) || LangFilter.check("EN", line)) {
                                 prefiltered++;
                                 reject = true;
                                 break;
@@ -191,14 +202,15 @@ public class WikiFileDumpParser extends Task implements Runnable {
                             //postevaluate
                             if (evaluateDefinition(definition)) {
                                 if (verbose) {
-                                    System.out.println("+ " + title + " : " + definition);
+                                    //System.out.println("+ " + title + " : " + definition);
+                                    System.out.println(title + " : " + definition);
                                 }
                                 if (db != null) {
                                     db.insertDefinition(id, title, definition);
                                 }
                             } else {
                                 if (verbose) {
-                                    System.out.println("- " + title + " : " + definition);
+                                    //System.out.println("- " + title + " : " + definition);
                                 }
                             }
                         }
