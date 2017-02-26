@@ -33,6 +33,7 @@ public class WikiTextParser {
                         && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                         && !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
                         //TODO: Wenn vor Punkt eine Zahl vor der Zahl nur kleingeschriebenes Wort mit min. Länge von 3 Zeichen
+                        //TODO: abkürzungen in klammern "(span. ..." (Aragosaurus)
                         // && !(
                         //    !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
                         // && segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).substring(segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).lastIndexOf(" ")+1).matches("^[a-z]")
@@ -142,13 +143,11 @@ public class WikiTextParser {
         Matcher m;
 
         //remove all < > notated tags
-        // TODO: ref-Boxen der Art <ref name="..."/> (Aragosaurus)
-        // TODO: Leere Divs (CSU-Landesgruppe)
         // TODO: Kommentar abgeschnitten !--> (Auge)
-        // TODO: Multiple " " (Phuwiangosaurus)
         extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
         extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
-        extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?: \\/>)", "");
+        extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?:\\/>)", "");
+        extract = StringUtils.replaceAll(extract, "(?:<div )(?:[^<]*)(?:>)(?:[^<]*)(?:<\\/div>)", "");
         extract = StringUtils.replace(extract, "<br />", "");
         extract = StringUtils.replace(extract, "<nowiki />", "");
         extract = StringUtils.replace(extract, "<references />", "");
@@ -171,9 +170,14 @@ public class WikiTextParser {
                 }
             }
             //remove files, picture, categories and other
-            // TODO: while m.find() - vielleicht reichen auch schon zwei
-            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
-            extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
+            // TODO?!: while m.find() - vielleicht reichen auch schon zwei
+            r = Pattern.compile("(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])");
+            m = r.matcher(extract);
+            while (m.find()) {
+                extract = StringUtils.replace(extract, m.group(), "");
+            }
+            //extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
+            //extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
 
             //remove all {{ }} tags
             //remove wikipediaobjects
@@ -206,6 +210,7 @@ public class WikiTextParser {
         extract = StringUtils.replace(extract, "�", "");
         extract = StringUtils.replace(extract, " : ", "");
         extract = StringUtils.replace(extract, " ; ", "");
+        extract = StringUtils.replace(extract, "\" \"", "");
         extract = StringUtils.replace(extract, "__NOTOC__", "");
 
         return extract;
