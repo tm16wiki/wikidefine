@@ -141,7 +141,7 @@ public class WikiTextParser {
 
         //remove all < > notated tags
         extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
-        extract = StringUtils.replaceAll(article, "(!-->)", "");
+        extract = StringUtils.replaceAll(extract, "(!-->)", "");
         extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
         extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?:\\/>)", "");
         extract = StringUtils.replaceAll(extract, "(?:<div )(?:[^<]*)(?:>)(?:[^<]*)(?:<\\/div>)", "");
