@@ -63,7 +63,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
             //get first line
             String line = file.readLine();
             //cut xml:lang ..
-            this.lang = line.substring(line.indexOf("xml:lang=\""), line.lastIndexOf("\">"));
+            this.lang = line.substring(line.indexOf("xml:lang=\"")+10, line.lastIndexOf("\">"));
         } catch (Exception e) {
             e.printStackTrace();
         }

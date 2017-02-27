@@ -15,10 +15,10 @@ public class LangFilter {
      * @return true if input string contains tags in given language
      */
     public static boolean check(String lang, String str) {
-        switch (lang.toUpperCase()) {
-            case "EN":
+        switch (lang.toLowerCase()) {
+            case "en":
                 return checkEN(str);
-            case "DE":
+            case "de":
                 return checkDE(str);
         }
         return false;
