@@ -93,7 +93,7 @@ java -jar target/WikiDefine-*.jar
 ### Configuration
 
 In the first input field you will need to specify the path to the Wikipedia XML dump file. Press "Open" to open a file select dialogue.
-Under that you can specify the maximum number of pages to extract, turn off statistics, verbose output and database export. On the right size you can select the number of thread to use and your desired language.
+Under that you can specify the maximum number of pages to extract, turn off statistics, verbose output and database export. On the right size you can select the number of thread to use.
 After you configured your database (if database export is selected) you can press the Run-button on the right hand to start the extraction process. You will see a progress bar on the bottom border.
 
 ## Built With
