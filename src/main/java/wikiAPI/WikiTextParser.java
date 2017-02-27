@@ -30,7 +30,6 @@ public class WikiTextParser {
         for (int i = 0; i < segs.length; i++) {
             brackets += StringUtils.countMatches(segs[i], "(");
             brackets -= StringUtils.countMatches(segs[i], ")");
-            System.out.println(segs[i] + "-" + brackets);
             if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
                 if (segs[i].trim().substring(0,2).equals("==") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
                     break;
@@ -39,12 +38,7 @@ public class WikiTextParser {
                 if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
                         && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                         && !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
-                        //TODO: Wenn vor Punkt eine Zahl vor der Zahl nur kleingeschriebenes Wort mit min. Länge von 3 Zeichen
-                        // && !(
-                        //    !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
-                        // && segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).substring(segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).lastIndexOf(" ")+1).matches("^[a-z]")
-                         && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+")
-                        //) // wenn vor Punkt Zahl und vor Zahl kleingeschrieben kein Satzende
+                        && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" \\d+") // wenn vor Punkt Zahl kein Satzende
                         && !segs[i - 1].substring(segs[i - 1].length() - 2).matches("^ \\w") // direkt vor Punkt steht nicht nur ein Zeichen
                         && segs[i].length() > 2 // neues Segment ist laenger als 2 Zeichen
                         && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" " + consonants + "+") // letztes Wort besteht nicht ausschliesslich aus Konsonanten
@@ -146,8 +140,8 @@ public class WikiTextParser {
         Matcher m;
 
         //remove all < > notated tags
-        // TODO: Kommentar abgeschnitten !--> (Auge)
         extract = StringUtils.replaceAll(article, "(?:<!--)(?:[^<]*)(?:-->)", "");
+        extract = StringUtils.replaceAll(article, "(!-->)", "");
         extract = StringUtils.replaceAll(extract, "(?:<)(?:\\w*)(?:[^>]*)(?:>)(?:[^<]*)(?:<\\/)(?:\\w*)(?:>)", "");
         extract = StringUtils.replaceAll(extract, "(?:<ref )(?:[^<]*)(?:\\/>)", "");
         extract = StringUtils.replaceAll(extract, "(?:<div )(?:[^<]*)(?:>)(?:[^<]*)(?:<\\/div>)", "");
