@@ -30,8 +30,8 @@ public class WikiTextParser {
         for (int i = 0; i < segs.length; i++) {
             brackets += StringUtils.countMatches(segs[i], "(");
             brackets -= StringUtils.countMatches(segs[i], ")");
-            if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
-                if (segs[i].trim().substring(0, 2).equals("==") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
+            if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 3 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
+                if (segs[i].trim().substring(0, 1).equals("=") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
                     break;
                 }
                 // pruefe ob aktueller chunk neuer satz ist, Satzende: i-1
