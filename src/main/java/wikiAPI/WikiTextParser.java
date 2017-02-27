@@ -22,18 +22,24 @@ public class WikiTextParser {
         String finalstr = "";
         String newstr = "";
         int sentences = 0;
+        int brackets = 0;
         int maxsentences = 2; // number of output sentences
         String[] segs = str.split(Pattern.quote("."));
         String consonants = "[B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,ß,T,V,W,X,Z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,z]";
 
         for (int i = 0; i < segs.length; i++) {
-            if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ")) { // Segmente gross genug zum Untersuchen
+            brackets += StringUtils.countMatches(segs[i], "(");
+            brackets -= StringUtils.countMatches(segs[i], ")");
+            System.out.println(segs[i] + "-" + brackets);
+            if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
+                if (segs[i].trim().substring(0,2).equals("==") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
+                    break;
+                }
                 // pruefe ob aktueller chunk neuer satz ist, Satzende: i-1
                 if (segs[i].substring(0, 1).equals(" ") // jeder neue satz beginnt mit leerzeichen
                         && segs[i].substring(1, 2).matches("[A-Z]") // jeder neue Satz beginnt mit großem Buchstaben
                         && !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
                         //TODO: Wenn vor Punkt eine Zahl vor der Zahl nur kleingeschriebenes Wort mit min. Länge von 3 Zeichen
-                        //TODO: abkürzungen in klammern "(span. ..." (Aragosaurus)
                         // && !(
                         //    !segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).equals("")
                         // && segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).substring(segs[i - 1].substring(0, segs[i - 1].lastIndexOf(" ")).lastIndexOf(" ")+1).matches("^[a-z]")
@@ -45,9 +51,6 @@ public class WikiTextParser {
                         && !segs[i - 1].substring(segs[i - 1].lastIndexOf(" ")).matches(" (^[a-z])(.*)([h|l|z]$)") // letztes Wort ist nicht kleingeschrieben und endet mit h oder l oder z
                         ) {
                     sentences++; // neuen Satzanfang gefunden
-                    if (segs[i].trim().substring(0,1).matches("=") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
-                        break;
-                    }
                     if (sentences < maxsentences) { // noch nicht max sentences erreicht - fuege anfang naechsten satz hinzu
                         newstr += segs[i] + ".";
                         finalstr += newstr;
