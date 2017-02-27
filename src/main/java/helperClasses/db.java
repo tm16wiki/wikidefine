@@ -9,6 +9,8 @@ import java.sql.*;
  * Class to manage db connection independent of the type of the db
  */
 public class db {
+    PreparedStatement prepStmt = null;
+    int count = 0;
     private Connection c;
     private String path;
 
@@ -37,6 +39,7 @@ public class db {
             System.out.println("Error loading driver");
         }
     }
+
 
     /**
      * Constructor for postgresql and mysql
@@ -108,7 +111,6 @@ public class db {
         return null;
     }
 
-
     /**
      * Inserts definition into db
      *
@@ -127,6 +129,34 @@ public class db {
         }
     }
 
+    public void insertDefinition2(int id, String title, String definition) {
+        try {
+            if (prepStmt == null) {
+                prepStmt = c.prepareStatement("insert into definition( id, title, text) values( ?,?,?);");
+            }
+            prepStmt.setLong(1, id);
+            prepStmt.setString(2, title);
+            prepStmt.setString(3, definition);
+
+            prepStmt.addBatch();
+
+            if (count++ > 1000) {
+                commitBatch();
+                count = 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void commitBatch() {
+        try {
+            int[] test = prepStmt.executeBatch();
+        } catch (SQLException e) {
+            //e.printStackTrace();
+        }
+    }
 
     /**
      * Inserts configuration into db

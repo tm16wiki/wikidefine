@@ -31,7 +31,7 @@ public class WikiTextParser {
             brackets += StringUtils.countMatches(segs[i], "(");
             brackets -= StringUtils.countMatches(segs[i], ")");
             if (i >= 1 && segs[i - 1].length() > 2 && segs[i].length() > 2 && segs[i - 1].contains(" ") && brackets == 0) { // Segmente gross genug zum Untersuchen und nicht in Klammern
-                if (segs[i].trim().substring(0,2).equals("==") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
+                if (segs[i].trim().substring(0, 2).equals("==") || segs[i].substring(1, 2).matches("<")) { // new headline - cut
                     break;
                 }
                 // pruefe ob aktueller chunk neuer satz ist, Satzende: i-1
@@ -60,8 +60,8 @@ public class WikiTextParser {
             }
         }
         finalstr += newstr; // max sentences erreicht - fuege letzten satz zu final string hinzu
-        if (finalstr.length() > 2 && finalstr.substring(finalstr.length()-2, finalstr.length()).equals(" .")) {
-            finalstr = finalstr.substring(0, finalstr.length()-2);
+        if (finalstr.length() > 2 && finalstr.substring(finalstr.length() - 2, finalstr.length()).equals(" .")) {
+            finalstr = finalstr.substring(0, finalstr.length() - 2);
         }
         return finalstr.trim();
     }

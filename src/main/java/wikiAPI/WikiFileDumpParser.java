@@ -8,7 +8,6 @@ import javafx.embed.swing.JFXPanel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.util.Objects;
 
 import static java.lang.StrictMath.round;
@@ -63,7 +62,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
             //get first line
             String line = file.readLine();
             //cut xml:lang ..
-            this.lang = line.substring(line.indexOf("xml:lang=\"")+10, line.lastIndexOf("\">"));
+            this.lang = line.substring(line.indexOf("xml:lang=\"") + 10, line.lastIndexOf("\">"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -206,7 +205,8 @@ public class WikiFileDumpParser extends Task implements Runnable {
                                     System.out.println(title + " : " + definition);
                                 }
                                 if (db != null) {
-                                    db.insertDefinition(id, title, definition);
+                                    //todo new insert
+                                    db.insertDefinition2(id, title, definition);
                                 }
                             } else {
                                 if (verbose) {
@@ -218,6 +218,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                     }
                 }
                 file.close();
+                db.commitBatch();
             } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             }
