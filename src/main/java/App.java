@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import wikiAPI.WikiFileDumpParser;
 
 /**
  * Manages application launch - shell or GUI
@@ -18,6 +19,13 @@ public class App extends Application {
      * @param args
      */
     public static void main(String[] args) {
+
+        if (args.length > 1 && args[0].contains("csv")) {
+            new Thread(new WikiFileDumpParser(8, Integer.MAX_VALUE, false, true, args[1], null)).start();
+            return;
+        }
+
+
         if (args.length > 0 && args[0].contains("gui")) {
             launch(); // launch GUI
         } else { // launch shell
