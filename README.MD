@@ -9,12 +9,14 @@ Just clone the repo, run maven and you're ready to go.
 ### Prerequisites
 
 You need to have a JDK (we tested with 1.8), git and maven installed. Beware when using openjdk you'll need the openjfx package also installed.
+When you want to use the file dump extractor you will need a Wikipedia database dump file including pages and articles.
+For english it is enwiki-20170220-pages-articles.xml.bz2 . You can download it from [Wikimedia Downloads](https://dumps.wikimedia.org) .
 
 ### Installing
 
 Clone the repository:
 ```
-git clone git@github.com:tm16wiki/wikidefine.git
+git clone https://github.com/tm16wiki/wikidefine.git
 ```
 
 Then run maven to download the dependencies:
