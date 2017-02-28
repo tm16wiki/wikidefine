@@ -100,8 +100,8 @@ public class WikiTextParser {
                 */
         };
 
-        text = StringUtils.replace(text, "'''", "\"");
-        text = StringUtils.replace(text, "''", "\"");
+        text = StringUtils.replace(text, "'''", "");
+        text = StringUtils.replace(text, "''", "");
 
         //wegen [http://www.wip...ountry_codes&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;rdquo; in "African Regional Intellectual Property Organization"
         try {
@@ -211,6 +211,28 @@ public class WikiTextParser {
         extract = StringUtils.replace(extract, "__NOTOC__", "");
 
         return extract;
+    }
+
+    /**
+     * Returns title in right case, extracted from definition text
+     * @param title Title from title-tag
+     * @param article Definition text from text-tag
+     * @return title in right case
+     */
+    public String getRightTitle(String title, String article) {
+        Pattern p = Pattern.compile("'''(.*?)'''");
+        if (article == null || article == "") {
+            return title;
+        } else {
+            Matcher m = p.matcher(article);
+            while (m.find()) {
+                if (m.group().equalsIgnoreCase("'''" + title + "'''")) { // match - uebernehme neuen title
+                    title = StringUtils.replace(m.group(), "'''", "");
+                    ;
+                }
+            }
+            return title;
+        }
     }
 
     /**
