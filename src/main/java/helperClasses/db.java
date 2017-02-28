@@ -155,6 +155,8 @@ public class db {
             int[] test = prepStmt.executeBatch();
         } catch (SQLException e) {
             //e.printStackTrace();
+        } catch (NullPointerException e) {
+            //e.printStrackTrace();
         }
     }
 
