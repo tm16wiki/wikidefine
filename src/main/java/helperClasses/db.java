@@ -134,7 +134,7 @@ public class db {
             if (prepStmt == null) {
                 prepStmt = c.prepareStatement("insert into definition( id, title, text, wikititle) values( ?,?,?,?);");
             }
-            prepStmt.setLong(1, id);
+            prepStmt.setInt(1, id);
             prepStmt.setString(2, title);
             prepStmt.setString(3, definition);
             prepStmt.setString(4, wikititle);
