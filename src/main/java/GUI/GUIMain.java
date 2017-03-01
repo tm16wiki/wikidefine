@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Created by Christian on 01.03.2017.
+ * Class for GUI
  */
 public class GUIMain extends Application {
     /**
