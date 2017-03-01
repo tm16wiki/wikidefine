@@ -52,7 +52,11 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.verbose = verbose;
         this.path = path;
         this.db = db;
-        new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
+        try {
+            new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         //autodetect lang
         try {
@@ -198,6 +202,8 @@ public class WikiFileDumpParser extends Task implements Runnable {
                             String title = xml.getTagValue(page, "title");
                             int id = Integer.parseInt(xml.getTagValue(page, "id"));
                             String definition = text.getDefinition(article);
+                            String wikititle = text.getRightTitle(title, article);
+
                             //postevaluate
                             if (evaluateDefinition(definition)) {
                                 if (verbose) {
@@ -206,7 +212,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                                 }
                                 if (db != null) {
                                     //todo new insert
-                                    db.insertDefinition2(id, title, definition);
+                                    db.insertDefinition2(id, title, definition, wikititle);
                                 }
                             } else {
                                 if (verbose) {
@@ -218,7 +224,12 @@ public class WikiFileDumpParser extends Task implements Runnable {
                     }
                 }
                 file.close();
-                db.commitBatch();
+                try {
+                    db.commitBatch();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+
             } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             }

@@ -2,5 +2,6 @@
 CREATE TABLE IF NOT EXISTS `definition` (
 	`id`	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 	`title`	TEXT NOT NULL UNIQUE,
-	`text`	TEXT NOT NULL
+	`text`	TEXT NOT NULL,
+	`wikititle`	TEXT
 );
