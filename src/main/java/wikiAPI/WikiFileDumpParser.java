@@ -199,7 +199,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                             int id = Integer.parseInt(xml.getTagValue(page, "id"));
                             String definition = text.getDefinition(article);
 
-                            title = text.getRightTitle(title, article);
+                            String wikititle = text.getRightTitle(title, article);
 
                             //postevaluate
                             if (evaluateDefinition(definition)) {
@@ -209,7 +209,7 @@ public class WikiFileDumpParser extends Task implements Runnable {
                                 }
                                 if (db != null) {
                                     //todo new insert
-                                    db.insertDefinition(id, title, definition);
+                                    db.insertDefinition2(id, title, definition, wikititle);
                                 }
                             } else {
                                 if (verbose) {
