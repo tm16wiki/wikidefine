@@ -221,7 +221,9 @@ public class WikiFileDumpParser extends Task implements Runnable {
                     }
                 }
                 file.close();
-                db.commitBatch();
+                if (db != null) {
+                    db.commitBatch();
+                }
             } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             }
