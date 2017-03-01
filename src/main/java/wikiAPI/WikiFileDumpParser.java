@@ -52,7 +52,11 @@ public class WikiFileDumpParser extends Task implements Runnable {
         this.verbose = verbose;
         this.path = path;
         this.db = db;
-        new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
+        try {
+            new JFXPanel(); // create dummy JFXPanel to avoid "Toolkit not initialized" message
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         //autodetect lang
         try {
