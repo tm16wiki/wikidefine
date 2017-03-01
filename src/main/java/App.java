@@ -1,17 +1,13 @@
 import CLI.ConfigCLI;
+import GUI.GUIMain;
 import asg.cliche.Shell;
 import asg.cliche.ShellFactory;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import wikiAPI.WikiFileDumpParser;
 
 /**
  * Manages application launch - shell or GUI
  */
-public class App extends Application {
+public class App {
 
     /**
      * Starting method
@@ -25,9 +21,8 @@ public class App extends Application {
             return;
         }
 
-
         if (args.length > 0 && args[0].contains("gui")) {
-            launch(); // launch GUI
+            javafx.application.Application.launch(GUIMain.class);
         } else { // launch shell
             Shell shell = ShellFactory.createConsoleShell("wikiDefine", "'?list' or '?list-all' to show commands", new ConfigCLI());
             try {
@@ -42,27 +37,5 @@ public class App extends Application {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Starts the GUI
-     *
-     * @param primaryStage Window
-     * @throws Exception FXML Exception
-     */
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/Views/parserGUI.fxml"));
-        primaryStage.setTitle("WikiDefine");
-        primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(false);
-        primaryStage.sizeToScene();
-        primaryStage.getIcons().add(
-                new javafx.scene.image.Image(
-                        App.class.getResourceAsStream("/Theme/WikiDefineIcon.png"))
-        );
-
-        App.class.getResource("/Theme/WikiDefineIcon.png");
-        primaryStage.show();
     }
 }
