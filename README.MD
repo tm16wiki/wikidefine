@@ -51,7 +51,7 @@ java -jar target/WikiDefine-*.jar
 You will need to create a new definition at first.
 Please name it default as the default configuration will be selected the next time you run Wikidefine.
 Then please specify the language of your Wikipedia dumps (de|en). Afterwards please type in the absolute filepath to the Wikipedia XML dump file.
-You will then be asked for a database. Type in the address of your PostgreSQL database or the filepath to your sqlite database.
+You will then be asked for a database. Type in the address of your PostgreSQL or MySQL database or the filepath to your sqlite database, for example MySQL: mysql://<ip-address>/<db-name>.
 It's also possible to enter a filepath to a sqlite database which does not exist yet - Wikidefine will automatically create a new sqlite database.
 To finalize the database configuration you will need to enter the database user and password unless you selected a sqlite database.
 
