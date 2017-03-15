@@ -74,10 +74,12 @@ public class db {
                 System.out.print("connecting to MySQLDB " + path + " " + user + " " + pass + " " +
                         "... ");
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
-                Class.forName("com.mysql.jdbc.Driver\"");
+                c.setAutoCommit(false);
+                Class.forName("com.mysql.jdbc.Driver");
                 System.out.printf("connected!\n");
                 //setup table
-                executeDBScript("definition.mysql.sql");
+                executeDBScript("Skripts/definition.my.sql");
+
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
             } catch (ClassNotFoundException e) {
@@ -146,6 +148,8 @@ public class db {
                 count = 0;
             }
 
+        } catch ( NullPointerException e){
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -157,7 +161,7 @@ public class db {
         } catch (SQLException e) {
             //e.printStackTrace();
         } catch (NullPointerException e) {
-            //e.printStrackTrace();
+            //e.printStackTrace();
         }
     }
 
