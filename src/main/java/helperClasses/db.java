@@ -82,6 +82,7 @@ public class db {
 
             } catch (SQLException e) {
                 System.out.printf("Error!\n");
+                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.out.println("Error loading driver");
             }
