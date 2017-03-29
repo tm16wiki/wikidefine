@@ -150,11 +150,12 @@ public class WikiTextParser {
                 }
             }
             //remove files, picture, categories and other
-            // TODO?!: while m.find() - vielleicht reichen auch schon zwei
-            r = Pattern.compile("(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])");
-            m = r.matcher(extract);
-            while (m.find()) {
-                extract = StringUtils.replace(extract, m.group(), "");
+            for (int i = 0; i < 2; i++) {
+                r = Pattern.compile("(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])");
+                m = r.matcher(extract);
+                while (m.find()) {
+                    extract = StringUtils.replace(extract, m.group(), "");
+                }
             }
 
             //remove all {{ }} tags
@@ -167,6 +168,8 @@ public class WikiTextParser {
                 while (m.find()) {
                     if (m.group().contains("lang") || m.group().contains("IPA")) { // keep info in lang- and IPA-tags
                         extract = StringUtils.replace(extract, m.group(), m.group().substring(m.group().lastIndexOf("|") + 1, m.group().length() - 2));
+                    } else if (m.group().contains("enS")) { // "englisch", bsp: Anime
+                        extract = StringUtils.replace(extract, m.group(), "engl. " + m.group().substring(m.group().lastIndexOf("|") + 1, m.group().length() - 2));
                     } else {
                         extract = StringUtils.replace(extract, m.group(), "");
                     }
