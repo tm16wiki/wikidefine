@@ -77,33 +77,16 @@ public class WikiTextParser {
         String[] escapes;
         escapes = new String[]{
                 //html escape sequences
-                "&quot;", "&apos;", "&amp;", "&lt;", "&gt;", "&nbsp;", "&shy;", /*"&iexcl;", "&cent;", "&pound;", "&curren;",
-                "&yen;", "&brvbar;", "&sect;", "&uml;", "&copy;", "&ordf;", "&laquo;", "&not;", "&reg;",
-                "&macr;", "&deg;", "&plusmn;", "&sup2;", "&sup3;", "&acute;", "&micro;", "&para;", "&middot;", "&cedil;",
-                "&sup1;", "&ordm;", "&raquo;", "&frac14;", "&frac12;", "&frac34;", "&iquest;", "&times;", "&divide;",
-                "&Agrave;", "&Aacute;", "&Acirc;", "&Atilde;", "&Auml;", "&Aring;", "&AElig;", "&Ccedil;", "&Egrave;",
-                "&Eacute;", "&Ecirc;", "&Euml;", "&Igrave;", "&Iacute;", "&Icirc;", "&Iuml;", "&ETH;", "&Ntilde;",
-                "&Ograve;", "&Oacute;", "&Ocirc;", "&Otilde;", "&Ouml;", "&Oslash;", "&Ugrave;", "&Uacute;", "&Ucirc;",
-                "&Uuml;", "&Yacute;", "&THORN;", "&szlig;", "&agrave;", "&aacute;", "&acirc;", "&atilde;", "&auml;",
-                "&aring;", "&aelig;", "&ccedil;", "&egrave;", "&eacute;", "&ecirc;", "&euml;", "&igrave;", "&iacute;",
-                "&icirc;", "&iuml;", "&eth;", "&ntilde;", "&ograve;", "&oacute;", "&ocirc;", "&otilde;", "&ouml;",
-                "&oslash;", "&ugrave;", "&uacute;", "&ucirc;", "&uuml;", "&yacute;", "&thorn;", "&yuml;"
-                */
+                "&quot;", "&apos;", "&amp;", "&lt;", "&gt;", "&nbsp;", "&shy;"
         };
         replacements = new String[]{
                 //html escape sequence replacements
-                "\"", "'", "&", "<", ">", " ", " ", /*"¡", "¢", "£", "¤", "¥", "¦", "§", "¨", "©", "ª", "«", "¬", "®",
-                "¯", "°", "±", "²", "³", "´", "µ", "¶", "·", "¸", "¹", "º", "»", "¼", "½", "¾", "¿", "×", "÷", "À", "Á",
-                "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö",
-                "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ", "ß", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì",
-                "í", "î", "ï", "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "þ", "ÿ"
-                */
+                "\"", "'", "&", "<", ">", " ", " "
         };
 
         text = StringUtils.replace(text, "'''", "");
         text = StringUtils.replace(text, "''", "");
 
-        //wegen [http://www.wip...ountry_codes&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;rdquo; in "African Regional Intellectual Property Organization"
         try {
             return StringUtils.replaceEachRepeatedly(text, escapes, replacements);
         } catch (IllegalStateException e) {
@@ -173,8 +156,6 @@ public class WikiTextParser {
             while (m.find()) {
                 extract = StringUtils.replace(extract, m.group(), "");
             }
-            //extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
-            //extract = StringUtils.replaceAll(extract, "(?:\\[\\[)(?:\\w*):(?:[^\\[\\]]*)(?:\\]\\])", "");
 
             //remove all {{ }} tags
             //remove wikipediaobjects
@@ -184,7 +165,11 @@ public class WikiTextParser {
                 r = Pattern.compile("(?:\\{\\{)(?:[^\\{\\}]*)(?:\\}\\})");
                 m = r.matcher(extract);
                 while (m.find()) {
-                    extract = StringUtils.replace(extract, m.group(), "");
+                    if (m.group().contains("lang") || m.group().contains("IPA")) { // keep info in lang- and IPA-tags
+                        extract = StringUtils.replace(extract, m.group(), m.group().substring(m.group().lastIndexOf("|") + 1, m.group().length() - 2));
+                    } else {
+                        extract = StringUtils.replace(extract, m.group(), "");
+                    }
                 }
             }
         } catch (NullPointerException e) {
@@ -228,7 +213,6 @@ public class WikiTextParser {
             while (m.find()) {
                 if (m.group().equalsIgnoreCase("'''" + title + "'''")) { // match - uebernehme neuen title
                     title = StringUtils.replace(m.group(), "'''", "");
-                    ;
                 }
             }
             return title;
