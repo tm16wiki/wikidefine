@@ -74,7 +74,6 @@ public class db {
                 System.out.print("connecting to MySQLDB " + path + " " + user + " " + pass + " " +
                         "... ");
                 c = DriverManager.getConnection("jdbc:" + path, user, pass);
-                c.setAutoCommit(false);
                 Class.forName("com.mysql.jdbc.Driver");
                 System.out.printf("connected!\n");
                 //setup table
@@ -160,9 +159,9 @@ public class db {
         try {
             int[] test = prepStmt.executeBatch();
         } catch (SQLException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         } catch (NullPointerException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
